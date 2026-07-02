@@ -1805,7 +1805,7 @@ document.
 
     </section>
 
-    <section>
+    <section id="Algorithms">
       <h2>Algorithms</h2>
 
       <p>
@@ -1831,7 +1831,12 @@ efficient ecosystem.
 
       <section class="normative">
         <h3>Processing Model</h3>
-
+        <p class="ednote">
+This "processing model" is for the non-selective disclosure case. Although it 
+can be extended by including "add base", "add derived", and "verify derived"
+cryptosuite calls in "Add Proof" and "Verify Proof" it seems we need a high 
+level explanation of the selective disclosure processing model somewhere.
+        </p>
         <p>
 The processing model used by a [=conforming processor=] and its
 application-specific software is described in this section. When software
@@ -2379,14 +2384,16 @@ The `challenge` value in a proof did not match the expected value. See Section
       </section>
     </section>
 
-    <section>
+    <section id="CryptosuiteCommonAlgorithms">
       <h2>Cryptosuite Common Algorithms</h2>
       <section class="informative">
         <h3>Introduction</h3>
         <p class="ednote">
 These algorithms are for the non-selective disclosure case.  There are 
 two key algorithms which are built from a common set of functions. These
-are "Create Proof" and "Verify Proof". These algorithms have a common 
+are "Create Proof" and "Verify Proof" which are called by the [[[#add-proof]]] 
+and [[[#verify-proof]]] general algorithms respectively. 
+These algorithms have a common 
 structure for all non-selective disclosure cryptosuites. We give these 
 algorithms in the following two sections along with the common functions
 that are used therein.
@@ -2791,13 +2798,13 @@ Return |verificationResult| as the <em>verification result</em>.
       </section>
     </section>
 
-    <section>
+    <section id="SDCryptosuiteCommonAlgorithms">
       <h2>Selective Disclosure Cryptosuite Common Algorithms</h2>
       <section class="informative">
         <h3>Introduction</h3>
         <p class="ednote">
 At a high level we have "Add Base Proof", "Add Derived Proof", and 
-"Verify Derived  Proof".  It might be niced to have an optional 
+"Verify Derived  Proof".  It might be nice to have an optional 
 "Verify Base Proof". We  currently have three basic flavors of selective
 disclosure procedures: (1) signing individual statements 
 (like ECDSA-SD), (2) salted hashes of statements like in PQC-SD, 
@@ -2807,7 +2814,41 @@ sizes, and the last when cryptographic algorithms directly support
 selective disclosure.  Note that the first could be applied to other
 signatures such as EdDSA or SQIsign level 1. The second has been applied
 to multiple PQC signatures. Finally the third could be expanded to use 
-new PQC-SD algorithms in development.
+new PQC-SD algorithms as they are  developed.
+        </p>
+        <p  class="ednote">
+Since the (1) individual sign approach can be readly extended to other signature
+algorithms and (2) salted hash approache has been parameterized by a number of
+signature algorithms should we define their "Create Base", "Add Derived", and
+"Verify Derived" here? It would make it clearer then where and how we use
+functions like "canonicalizeAndGroup", "hashMandatoryNQuads", and the like.
+        </p>
+      </section>
+      <section>
+        <h3>Create Base Proof</h3>
+        <p class="ednote">
+In surveying ECDSA-SD, Quantum Resistant SD, and BBS we see that this
+general procedure depends on: (a) generic Proof Configuration, (b) 
+cryptosuite type specific "Base Proof Transformation", (c) cryptosuite
+type specific "Base Proof Hashing", and (d) cryptosuite type specific 
+"Base Proof Serialization".
+        </p>
+      </section>
+      <section>
+        <h3>Add Derived Proof</h3>
+        <p class="ednote">
+In surveying ECDSA-SD, Quantum Resistant SD, and BBS we see that this
+general procedure depends on: (a) cryptosuite type specific "create 
+disclosure data", and (b) cryptosuite type specific "serialize derived 
+proof value".
+        </p>
+      </section>
+      <section>
+        <h3>Verify Derived Proof</h3>
+        <p class="ednote">
+In surveying ECDSA-SD, Quantum Resistant SD, and BBS we see that this
+procedure depends on: (a) cryptosuite type specific "create 
+verify data", and (b) cryptosuite type specific verification procedure.
         </p>
       </section>
     </section>
