@@ -2797,6 +2797,52 @@ Return |verificationResult| as the <em>verification result</em>.
         </section>
       </section>
     </section>
+    <section id="GeneralSelectiveDisclosure">
+      <h2>Selective  Disclosure</h2>
+      <section>
+        <h3>Introduction</h3>
+        <p class="ednote">
+Here we need to explain how selective disclosure is a privacy enhancing 
+technology. Include benefits to the holder, constraints from the issuer,
+and guarantees to the verifier.
+        </p>
+      </section>
+      <section>
+        <h3>How it  Works</h3>
+        <p class="ednote">
+Here we explain the steps for base proof creation, derived proof 
+creation, and derived proof verification.
+        </p>
+        <figure id="hiw-base-creation">
+          <img style="margin: auto; display: block; width: 100%;"
+               src="diagrams/hiw-base-creation.svg" alt="TODO">
+          <figcaption style="text-align: center;">
+To create a cryptographic base proof, data is 
+transformed subject to manditory disclosure constraints, hashed, and 
+cryptographically protected.
+          </figcaption>
+        </figure>
+
+        <figure id="hiw-derived-creation">
+          <img style="margin: auto; display: block; width: 100%;"
+               src="diagrams/hiw-derived-creation.svg" alt="TODO">
+          <figcaption style="text-align: center;">
+To create a seletively disclosed document with cryptographic derived proof, data 
+together with a base proof is transformed subject to selective disclosure 
+constraints, and appropriate cryptograph processing.
+          </figcaption>
+        </figure>
+
+        <figure id="hiw-derived-verification">
+          <img style="margin: auto; display: block; width: 100%;"
+               src="diagrams/hiw-derived-verification.svg" alt="TODO">
+          <figcaption style="text-align: center;">
+To verify a selectively dislosed document with cryptographic derived proof, data 
+is transformed, hashed, and checked for correctness.
+          </figcaption>
+        </figure>
+      </section>
+    </section>
 
     <section id="SDCryptosuiteCommonAlgorithms">
       <h2>Selective Disclosure Cryptosuite Common Algorithms</h2>
@@ -2806,9 +2852,10 @@ Return |verificationResult| as the <em>verification result</em>.
 At a high level we have "Add Base Proof", "Add Derived Proof", and 
 "Verify Derived  Proof".  It might be nice to have an optional 
 "Verify Base Proof". We  currently have three basic flavors of selective
-disclosure procedures: (1) signing individual statements 
-(like ECDSA-SD), (2) salted hashes of statements like in PQC-SD, 
-(3) cryptographic support for multiple  "messages" like BBS.  The first
+disclosure procedures: (1) signing individual statements (SIS)
+(like ECDSA-SD), (2) salted hashes of statements (SHS) like in PQC-SD, 
+(3) cryptographic support for multiple  "messages" like BBS  (Multiple Message 
+Support MMS).  The first
 is good with small signature sizes, the second for larger signature
 sizes, and the last when cryptographic algorithms directly support 
 selective disclosure.  Note that the first could be applied to other
