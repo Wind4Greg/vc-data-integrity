@@ -2806,6 +2806,35 @@ Here we need to explain how selective disclosure is a privacy enhancing
 technology. Include benefits to the holder, constraints from the issuer,
 and guarantees to the verifier.
         </p>
+        <p>
+From the [[[VC-DATA-MODEL-2.0]]], a verifiable credential is a set of one or 
+more claims 
+made by the same issuer. A particular holder will typically have verifiable 
+credentials from many issuers. When presenting to a verifier a holder can choose 
+just one or a subset from their existing verifiable credentials to form a 
+verifiable presentation. By minimizing the subset of credentials in a verifiable
+presentation presented to a given verifier privacy is enhanced.
+        </p>
+        <p>
+To further enhance the privacy of a holder and issuer can create a verifiable 
+credential that supports <em>selective disclosure</em>. <em>Selective 
+disclosure</em> is a cryptographic technique which allow a issuer to create a
+verifiable credential 
+while allowing a holder to selectively reveal only a  subset of claims from the 
+original credential in a <em>derived credential</em> that will be presented to a 
+verifier. This is achieved with assurances from the issuer to the verifier of 
+the data integrity and authenticity of the <em>derived credential</em>. 
+        </p>
+        <p>
+Note that <em>selective disclosure</em> applies at the *claim* level. A holder 
+cannot alter the meaning of an issued claim and have the <em>derived 
+credential</em> verify. They can only limit which claims end up in the 
+<em>derived credential</em>  via a set of <em>selective disclosure 
+constraints</em>. Furthermore, to prevent credential claims 
+from being taken out of context in the selective disclosure process the issuer 
+can specify that certain claims from the original credential must be revealed 
+via <em>mandatory disclosure constraints</em>.
+        </p>
       </section>
       <section>
         <h3>How it  Works</h3>
