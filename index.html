@@ -2826,15 +2826,18 @@ verifier. This is achieved with assurances from the issuer to the verifier of
 the data integrity and authenticity of the <em>derived credential</em>. 
         </p>
         <p>
-Note that <em>selective disclosure</em> applies at the <em>claim</em> level. 
-A holder 
-cannot alter the meaning of an issued claim and have the <em>derived 
-credential</em> verify. They can only limit which claims end up in the 
-<em>derived credential</em>  via a set of <em>selective disclosure 
-constraints</em>. Furthermore, to prevent credential claims 
-from being taken out of context in the selective disclosure process the issuer 
-can specify that certain claims from the original credential must be revealed 
-via <em>mandatory disclosure constraints</em>.
+Note that typically <em>selective disclosure</em> applies at the <em>claim</em> 
+level. A holder cannot alter the meaning of an issued claim and have the 
+<em>derived credential</em> verify. They can only limit which claims end up in 
+the <em>derived credential</em>  via a set of <em>selective disclosure 
+constraints</em>. However, more advanced techniques such as <em>committed 
+disclosure</em> combined with ZKPs can, in some situations, allow a holder to
+reveal less than "full claim" information while maintaining issuer based 
+authenticity and data integrity.
+Furthermore, as an option, the issuer can specify that certain claims from the 
+original credential must be revealed via <em>mandatory disclosure 
+constraints</em>. Though it is typically the responsibility of the verifier to
+indicate what claims they want to verify.
         </p>
       </section>
       <section>
