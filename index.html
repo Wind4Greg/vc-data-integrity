@@ -1808,7 +1808,9 @@ document.
     <section>
       <h2>Algorithms</h2>
 
-      <p>
+      <section>
+        <h3>Document Algorithms</h3>
+        <p>
 The algorithms defined below operate on documents represented as <dfn
 data-cite="RFC8259#section-4">JSON objects</dfn>. This specification follows the
 [[[JSON-LD11-API]]] specification in representing a JSON object as a [=map=].
@@ -1817,9 +1819,9 @@ no proof values. An <dfn>input document</dfn> is an [=map=] that has not yet had
 the current proof added to it, but it MAY contain a proof value that was added
 to it by a previous process. A <dfn class="export">secured data document</dfn>
 is a [=map=] that contains one or more proof values.
-      </p>
+        </p>
 
-      <p>
+        <p>
 Implementers MAY implement reasonable defaults and safeguards in addition to the
 algorithms below, to help mitigate developer error, excessive resource
 consumption, newly discovered attack models against which there is a particular
@@ -1827,70 +1829,70 @@ protection, and other improvements. The algorithms provided below are the
 minimum requirements for an interoperable implementation, and developers are
 urged to include additional measures that could contribute to a safer and more
 efficient ecosystem.
-      </p>
+        </p>
 
-      <section class="normative">
-        <h3>Processing Model</h3>
+        <section class="normative">
+                <h4>Processing Model</h4>
 
-        <p>
+                <p>
 The processing model used by a [=conforming processor=] and its
 application-specific software is described in this section. When software
 is to ensure information is tamper-evident, it performs the following steps:
-        </p>
+                </p>
 
-        <ol>
-          <li>
+                <ol>
+                <li>
 The software arranges the information into a document, such as a JSON or
 JSON-LD document.
-          </li>
-          <li>
+                </li>
+                <li>
 If the document is a JSON-LD document, the software selects one or more
 JSON-LD Contexts and expresses them using the `@context` property.
-          </li>
-          <li>
+                </li>
+                <li>
 The software selects one or more cryptography suites that meet the needs of
 the use case, such as one that provides full, selective, or unlinkable
 disclosure, using acceptable cryptographic key material.
-          </li>
-          <li>
+                </li>
+                <li>
 The software uses the applicable algorithm(s) provided in Section [[[#add-proof]]]
 or Section [[[#add-proof-set-chain]]] to add one or more proofs.
-          </li>
-        </ol>
+                </li>
+                </ol>
 
-        <p>
+                <p>
 When software needs to use information that was transmitted to it using
 a mechanism described by this specification, it performs the following steps:
-        </p>
+                </p>
 
-        <ol>
-          <li>
+                <ol>
+                <li>
 The software transforms the incoming data into a document that can be understood
 by the applicable algorithm provided in Section [[[#verify-proof]]] or Section
 [[[#verify-proof-sets-and-chains]]].
-          </li>
-          <li>
+                </li>
+                <li>
 The software uses JSON Schema or an equivalent mechanism to validate that the
 incoming document follows an expected schema used by the application.
-          </li>
-          <li>
+                </li>
+                <li>
 The software uses the applicable algorithm(s) provided in Section [[[#verify-proof]]]
 or Section [[[#verify-proof-sets-and-chains]]] to verify the integrity of the
 incoming document.
-          </li>
-          <li>
+                </li>
+                <li>
 If the document is a JSON-LD document, the software uses the algorithm provided
 in Section [[[#context-validation]]], or one providing equivalent protections,
 to validate all JSON-LD Context values used in the document.
-          </li>
-        </ol>
+                </li>
+                </ol>
 
-      </section>
+        </section>
 
-      <section class="normative">
-        <h3>Add Proof</h3>
+        <section class="normative">
+                <h4>Add Proof</h4>
 
-        <p>
+                <p>
 The following algorithm specifies how a digital proof can be added to an [=input
 document=], and can then be used to verify the output document's authenticity
 and integrity. Required inputs are an [=input document=] ([=map=]
@@ -1898,47 +1900,47 @@ and integrity. Required inputs are an [=input document=] ([=map=]
 set of options ([=map=] |options|). Output is a [=secured data document=]
 ([=map=]) or an error. Whenever this algorithm encodes strings, it MUST use
 UTF-8 encoding.
-        </p>
+                </p>
 
-        <ol class="algorithm">
-          <li>
+                <ol class="algorithm">
+                <li>
 Let |proof| be the result of calling the [=cryptosuite instance/createProof=]
 algorithm specified in |cryptosuite|.|createProof| with |inputDocument|
 and |options| passed as a parameters. If the algorithm produces an error,
 the error MUST be propagated and SHOULD convey the error type.
-          </li>
-          <li>
+                </li>
+                <li>
 If one or more of the |proof|.|type|, |proof|.|verificationMethod|, and
 |proof|.|proofPurpose| values is not set, an error MUST be raised and SHOULD
 convey an error type of
 <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 If |options| has a non-null |domain| [=struct/item=], it MUST be equal to
 |proof|.|domain| or an error MUST be raised and SHOULD convey
 an error type of <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 If |options| has a non-null |challenge| [=struct/item=], it MUST be equal to
 |proof|.|challenge| or an error MUST be raised and SHOULD
 convey an error type of
 <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 Let |securedDataDocument| be a copy of |inputDocument|.
-          </li>
-          <li>
+                </li>
+                <li>
 Set |securedDataDocument|.|proof| to the value of |proof|.
-          </li>
-          <li>
+                </li>
+                <li>
 Return |securedDataDocument| as the [=secured data document=].
-          </li>
-        </ol>
+                </li>
+                </ol>
 
-      </section>
-      <section>
-        <h3>Add Proof Set/Chain</h3>
-        <p>
+        </section>
+        <section>
+                <h4>Add Proof Set/Chain</h4>
+                <p>
 The following algorithm specifies how to incrementally add a proof to a proof
 set or proof chain starting with a secured document containing either a proof or
 proof set/chain. Required inputs are a [=secured data document=] ([=map=]
@@ -1946,199 +1948,199 @@ proof set/chain. Required inputs are a [=secured data document=] ([=map=]
 instance=] |suite|), and a set of options ([=map=] |options|). Output is a new
 [=secured data document=] ([=map=]). Whenever this algorithm encodes strings, it
 MUST use UTF-8 encoding.
-        </p>
+                </p>
 
-        <ol class="algorithm">
-          <li>
+                <ol class="algorithm">
+                <li>
 Let |proof| be set to |securedDocument|.|proof|. Let
 |allProofs| be an empty list. If |proof| is a list, copy all
 the elements of |proof| to |allProofs|. If |proof|
 is an object add a copy of that object to |allProofs|.
-          </li>
-          <li>
+                </li>
+                <li>
 Let the |inputDocument| be a copy of the |securedDocument|
 with the |proof| attribute removed. Let |output| be a copy of
 the |inputDocument|.
-          </li>
-          <li>
+                </li>
+                <li>
 Let |matchingProofs| be an empty list.
-          </li>
-          <li>
+                </li>
+                <li>
 If |options| has a `previousProof` [=struct/item=] that is a string, add the
 element from |allProofs| with an `id` attribute matching `previousProof` to
 |matchingProofs|. If a proof with `id` equal to `previousProof` does not exist in
 |allProofs|, an error MUST be raised and SHOULD convey an error type of
 <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 If |options| has a `previousProof` [=struct/item=] that is an array, add each
 element from |allProofs| with an `id` attribute that matches an element of that
 array. If any element of `previousProof` [=list=] has an `id` attribute that does
 not match the `id` attribute of any element of |allProofs|, an error MUST be
 raised and SHOULD convey an error type of
 <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 Set |inputDocument|.|proof| to |matchingProofs|.
-            <div class="note" title="This step protects the document and existing proofs">
-              <p>
+                <div class="note" title="This step protects the document and existing proofs">
+                <p>
 This step adds references to the [=named graphs=], as well as adding a copy of
 <em>all</em> the claims contained in the [=proof graphs=]. The step is critical,
 as it <q>binds</q> any matching proofs to the document prior to applying the
 current proof. The |proof| value for the document will be updated in a later
 step of this algorithm.
-              </p>
-            </div>
-          </li>
-          <li>
+                </p>
+                </div>
+                </li>
+                <li>
 Run steps 1 through 6 of the algorithm in section [[[#add-proof]]], passing
 |inputDocument|, |suite|, and |options|. If no exceptions are raised, append
 the generated |proof| value to the |allProofs|; otherwise, raise the exception.
-          </li>
-          <li>
+                </li>
+                <li>
 Set |output|.|proof| to the value of |allProofs|.
-          </li>
-          <li>
+                </li>
+                <li>
 Return |output| as the new [=secured data document=].
-          </li>
-        </ol>
-      </section>
+                </li>
+                </ol>
+        </section>
 
-      <section>
-        <h3>Verify Proof</h3>
+        <section>
+                <h4>Verify Proof</h4>
 
-        <p>
+                <p>
 The following algorithm specifies how to check the authenticity and integrity of
 a [=secured data document=] by verifying its digital proof. The algorithm
 takes as input:
-        </p>
+                </p>
 
-        <dl>
-          <dt>|mediaType|</dt>
-          <dd>
+                <dl>
+                <dt>|mediaType|</dt>
+                <dd>
 A [=MIME type|media type=] as defined in [[MIMESNIFF]]
-          </dd>
-          <dt>|documentBytes|</dt>
-          <dd>
+                </dd>
+                <dt>|documentBytes|</dt>
+                <dd>
 A [=byte sequence=] whose media type is |mediaType|
-          </dd>
-          <dt>|cryptosuite|</dt>
-          <dd>
+                </dd>
+                <dt>|cryptosuite|</dt>
+                <dd>
 A [=cryptosuite instance=]
-          </dd>
-          <dt>|expectedProofPurpose|</dt>
-          <dd>
+                </dd>
+                <dt>|expectedProofPurpose|</dt>
+                <dd>
 An optional [=string=], used to ensure that the |proof| was generated by the
 proof creator for the expected reason by the verifier. See [[[#proof-purposes]]]
 for common values
-          <dt>|domain|</dt>
-          <dd>
+                <dt>|domain|</dt>
+                <dd>
 An optional [=set=] of [=strings=], used by the proof creator to lock a proof to
 a particular security domain, and used by the verifier to ensure that a proof is
 not being used across different security domains
-          </dd>
-          <dt>|challenge|</dt>
-          <dd>
+                </dd>
+                <dt>|challenge|</dt>
+                <dd>
 An optional [=string=] [=challenge=], used by the verifier to ensure that an
 attacker is not replaying previously created proofs
-          </dd>
-        </dl>
+                </dd>
+                </dl>
 
-        <p>
+                <p>
 This algorithm returns a <dfn>verification result</dfn>, a [=struct=] whose
 [=struct/items=] are:
-        </p>
-        <dl data-dfn-for="verification result">
-          <dt><dfn data-dfn-for="verification result">verified</dfn></dt>
-          <dd>`true` or `false`</dd>
-          <dt><dfn data-dfn-for="verification result">verifiedDocument</dfn></dt>
-          <dd>
-<a data-cite="INFRA#nulls">Null</a>, if [=verification result/verified=] is
-`false`; otherwise, an [=input document=]
-          </dd>
-          <dt><dfn data-dfn-for="verification result">mediaType</dfn></dt>
-          <dd>
-<a data-cite="INFRA#nulls">Null</a>, if [=verification result/verified=] is
-`false`; otherwise, a [=MIME type|media type=], which MAY include [=MIME
-type/parameters=]
-          </dd>
-          <dt><dfn data-dfn-for="verification result" class="lint-ignore">warnings</dfn></dt>
-          <dd>
+                </p>
+                <dl data-dfn-for="verification result">
+                <dt><dfn data-dfn-for="verification result">verified</dfn></dt>
+                <dd>`true` or `false`</dd>
+                <dt><dfn data-dfn-for="verification result">verifiedDocument</dfn></dt>
+                <dd>
+        <a data-cite="INFRA#nulls">Null</a>, if [=verification result/verified=] is
+        `false`; otherwise, an [=input document=]
+                </dd>
+                <dt><dfn data-dfn-for="verification result">mediaType</dfn></dt>
+                <dd>
+        <a data-cite="INFRA#nulls">Null</a>, if [=verification result/verified=] is
+        `false`; otherwise, a [=MIME type|media type=], which MAY include [=MIME
+        type/parameters=]
+                </dd>
+                <dt><dfn data-dfn-for="verification result" class="lint-ignore">warnings</dfn></dt>
+                <dd>
 a [=list=] of [=ProblemDetails=], which defaults to an empty [=list=]
-          </dd>
-          <dt><dfn data-dfn-for="verification result">errors</dfn></dt>
-          <dd>
+                </dd>
+                <dt><dfn data-dfn-for="verification result">errors</dfn></dt>
+                <dd>
 a [=list=] of [=ProblemDetails=], which defaults to an empty [=list=]
-          </dd>
-        </dl>
+                </dd>
+                </dl>
 
-        <p>
+                <p>
 When a step says "an error MUST be raised", it means that a [=verification
 result=] MUST be returned with a [=verification result/verified=] value of
 `false` and a non-empty [=verification result/errors=] list.
-        </p>
+                </p>
 
-        <ol class="algorithm">
-          <li>
+                <ol class="algorithm">
+                <li>
 Let |securedDocument:map| be the result of running [=parse JSON bytes to an
 Infra value=] on |documentBytes|.
-          </li>
-          <li>
+                </li>
+                <li>
 If either |securedDocument| is not a [=map=] or |securedDocument|.|proof|
 is not a [=map=], an error MUST be raised and SHOULD convey an error type of
 <a href="https://www.w3.org/TR/VC-DATA-MODEL-2.0#PARSING_ERROR">
 PARSING_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 Let |proof:map| be |securedDocument|.|proof|.
-          </li>
-          <li>
+                </li>
+                <li>
 If one or more of |proof|.|type|,
 |proof|.|verificationMethod|, and
 |proof|.|proofPurpose| does not [=map/exist=],
 an error MUST be raised and SHOULD convey an error type of
 <a href="#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 If |expectedProofPurpose| was given, and it does not match
 |proof|.|proofPurpose|,
 an error MUST be raised and SHOULD convey an error type of
 <a href="#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 If |domain| was given, and it does not contain the same [=strings=] as
 |proof|.|domain| (treating a single [=string=] as a [=set=] containing just
 that [=string=]), an error MUST be raised and SHOULD convey an error type of <a
 href="#INVALID_DOMAIN_ERROR">INVALID_DOMAIN_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 If |challenge| was given, and it does not match
 |proof|.|challenge|, an error MUST be raised and SHOULD
 convey an error type of
 <a href="#INVALID_CHALLENGE_ERROR">INVALID_CHALLENGE_ERROR</a>.
-          </li>
-          <li>
+                </li>
+                <li>
 Let |cryptosuiteVerificationResult| be the result of running the
 |cryptosuite|.[=cryptosuite instance/verifyProof=] algorithm with
 |securedDocument| provided as input.
-          </li>
-          <li>
+                </li>
+                <li>
 Return a [=verification result=] with [=struct/items=]:
-            <dl data-link-for="verification result">
-              <dt>[=verified=]</dt>
-              <dd>|cryptosuiteVerificationResult|.|verified|</dd>
-              <dt>[=verifiedDocument=]</dt>
-              <dd>|cryptosuiteVerificationResult|.|verifiedDocument|</dd>
-              <dt>[=mediaType=]</dt>
-              <dd>|mediaType|</dd>
-            </dl>
-          </li>
-        </ol>
+                <dl data-link-for="verification result">
+                <dt>[=verified=]</dt>
+                <dd>|cryptosuiteVerificationResult|.|verified|</dd>
+                <dt>[=verifiedDocument=]</dt>
+                <dd>|cryptosuiteVerificationResult|.|verifiedDocument|</dd>
+                <dt>[=mediaType=]</dt>
+                <dd>|mediaType|</dd>
+                </dl>
+                </li>
+                </ol>
 
-      </section>
-      <section>
-        <h3>Verify Proof Sets and Chains</h3>
-        <p>
+        </section>
+        <section>
+                <h4>Verify Proof Sets and Chains</h4>
+                <p>
 In a [=proof set=] or [=proof chain=], a [=secured data document=] has a `proof`
 attribute which contains a list of [=proofs=] (|allProofs|). The following
 algorithm provides one method of checking the authenticity and integrity of a
@@ -2148,28 +2150,28 @@ subset of the proofs contained in |allProofs|. If another approach is taken to
 verify only a subset of the proofs, then it is important to note that any proof
 in that subset with a `previousProof` can only be considered verified if the
 proofs it references are also considered verified.
-        </p>
-        <p>
+                </p>
+                <p>
 Required input is a [=secured data document=] (|securedDocument|). A list of
 [=verification results=] corresponding to each proof in |allProofs| is
 generated, and a single combined [=verification result=] is returned as output.
 Implementations MAY return any of the other [=verification result=]s and/or any
 other metadata alongside the combined [=verification result=].
-        </p>
-        <ol class="algorithm">
-          <li>
+                </p>
+                <ol class="algorithm">
+                <li>
 Set |allProofs| to </var>|securedDocument|.|proof|.
-          </li>
-          <li>
+                </li>
+                <li>
 Set |verificationResults| to an empty list.
-          </li>
-          <li>
+                </li>
+                <li>
 For each |proof| in |allProofs|, do the following steps:
-            <ol class="algorithm">
-              <li>
+                <ol class="algorithm">
+                <li>
 Let |matchingProofs| be an empty list.
-              </li>
-              <li>
+                </li>
+                <li>
 If |proof| contains a `previousProof` attribute and the value of that
 attribute is a [=string=], add the element from |allProofs| with an `id`
 attribute value matching the value of `previousProof` to `matchingProofs`.
@@ -2183,200 +2185,203 @@ with an `id` attribute value that matches the value of an element of that
 value that does not match the `id` attribute value of any element of
 |allProofs|, an error MUST be raised and SHOULD convey an error type of
 <a href="#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
-              </li>
-              <li>
+                </li>
+                <li>
 Let |inputDocument| be a copy of |securedDocument| with the proof value
 removed and then set |inputDocument|.|proof| to |matchingProofs|.
 
-                <p class="note" title="Secure document and previous proofs">
+                        <p class="note" title="Secure document and previous proofs">
 See the note in Step 6 of Section [[[#add-proof-set-chain]]] to learn about
 what document properties and previous proofs this step secures.
-                </p>
-              </li>
-              <li>
+                        </p>
+                </li>
+                <li>
 Run steps 4 through 8 of the algorithm in section [[[#verify-proof]]] on
 |inputDocument|; if no exceptions are raised, append |cryptosuiteVerificationResult|
 to |verificationResults|.
                 </li>
-            </ol>
-          </li>
-          <li>
-Set |successfulVerificationResults| to an empty list.
-          </li>
-          <li>
-Let |combinedVerificationResult| be an empty struct. Set |combinedVerificationResult|.|status|
-to `true`, |combinedVerificationResult|.|document| to `null`, and
-|combinedVerificationResult|.|mediaType| to `null`.
-          </li>
-          <li>
-For each |cryptosuiteVerificationResult| in |verificationResults|:
-            <ol class="algorithm">
-              <li>
-If |cryptosuiteVerificationResult|.|verified| is `false`, set |combinedVerificationResult|.|verified|
-to `false`.
-              </li>
-              <li>
+                </ol>
+                </li>
+                <li>
+        Set |successfulVerificationResults| to an empty list.
+                </li>
+                <li>
+        Let |combinedVerificationResult| be an empty struct. Set |combinedVerificationResult|.|status|
+        to `true`, |combinedVerificationResult|.|document| to `null`, and
+        |combinedVerificationResult|.|mediaType| to `null`.
+                </li>
+                <li>
+        For each |cryptosuiteVerificationResult| in |verificationResults|:
+                <ol class="algorithm">
+                <li>
+        If |cryptosuiteVerificationResult|.|verified| is `false`, set |combinedVerificationResult|.|verified|
+        to `false`.
+                </li>
+                <li>
 Otherwise, set |combinedVerificationResult|.|document| to
 |cryptosuiteVerificationResult|.|verifiedDocument|, set
 |combinedVerificationResult|.|mediaType| to |cryptosuiteVerificationResult|.|mediaType|, and
 append |cryptosuiteVerificationResult| to |successfulVerificationResults|.
-              </li>
-            </ol>
-          </li>
-          <li>
+                </li>
+                </ol>
+                </li>
+                <li>
 If |combinedVerificationResult|.|status| is `false`, set
 |combinedVerificationResult|.|document| to `null` and
 |combinedVerificationResult|.|mediaType| to `null`.
-          </li>
-          <li>
+                </li>
+                <li>
 Return |combinedVerificationResult|, |successfulVerificationResults|.
-          </li>
-        </ol>
+                </li>
+                </ol>
+        </section>
+
+        <section class="normative">
+                <h3>Context Validation</h3>
+
+                <p>
+        The following algorithm provides one mechanism that can be used to ensure that
+        an application understands the contexts associated with a document before it
+        executed business rules specific to the input in the document. For more
+        rationale related to this algorithm, see Section [[[#validating-contexts]]].
+        This algorithm takes inputs of a document ([=map=] |inputDocument|), a set of
+        known JSON-LD Contexts ([=list=] |knownContext|), and a boolean to
+        recompact when unknown contexts are detected ([=boolean=] |recompact|).
+                </p>
+
+                <p>
+        This algorithm returns a <dfn class="lint-ignore">context validation result</dfn>,
+        a [=struct=] whose [=struct/items=] are:
+                </p>
+                <dl data-dfn-for="context validation result">
+                <dt><dfn data-dfn-for="context validation result">validated</dfn></dt>
+                <dd>`true` or `false`</dd>
+                <dt><dfn data-dfn-for="context validation result" class="lint-ignore">validatedDocument</dfn></dt>
+                <dd>
+        <a data-cite="INFRA#nulls">Null</a>, if [=context validation result/validated=] is
+        `false`; otherwise, an [=input document=]
+                </dd>
+                <dt><dfn data-dfn-for="context validation result" class="lint-ignore">warnings</dfn></dt>
+                <dd>
+        a [=list=] of [=ProblemDetails=], which defaults to an empty [=list=]
+                </dd>
+                <dt><dfn data-dfn-for="context validation result" class="lint-ignore">errors</dfn></dt>
+                <dd>
+        a [=list=] of [=ProblemDetails=], which defaults to an empty [=list=]
+                </dd>
+                </dl>
+
+                <p>
+        The context validation algorithm is as follows:
+                </p>
+
+                <ol class="algorithm">
+                <li>
+        Set |result|.|validated| to `false`, |result|.|warnings| to an empty list,
+        |result|.|errors| to an empty list, |compactionContext| to an empty list;
+        and clone |inputDocument| to |result|.|validatedDocument|.
+                </li>
+                <li>
+        Let |contextValue| be the value of the `@context` property of |result|.|validatedDocument|,
+        which might be undefined.
+                </li>
+                <li>
+        If |contextValue| does not deeply equal |knownContext|, any subtree in
+        |result|.|validatedDocument| contains an `@context` property, or any URI in
+        |contextValue| dereferences to a JSON-LD Context file that does not match a
+        known good value or cryptographic hash, then perform the applicable action:
+                <ol class="algorithm">
+                <li>
+        If |recompact| is `true`, set |result|.|validatedDocument| to the result
+        of running the <a data-cite="JSON-LD11-API#compaction-algorithm">
+        JSON-LD Compaction Algorithm</a> with the |inputDocument| and
+        |knownContext| as inputs. If the compaction fails, add at least one error
+        to |result|.|errors|.
+                </li>
+                <li>
+        If |recompact| is not `true`, add at least one error to |result|.|errors|.
+                </li>
+                </ol>
+                </li>
+                <li>
+        If |result|.|errors| is empty, set |result|.|validated| to `true`; otherwise, set
+        |result|.|validated| to `false`, and remove the |document| property from |result|.
+                </li>
+                <li>
+        Return the value of |result|.
+                </li>
+                </ol>
+
+                <p>
+        Implementations MAY include additional warnings or errors that enforce
+        further validation rules that are specific to the implementation or a
+        particular use case.
+                </p>
+
+        </section>
+
+        <section class="normative">
+                <h3>Processing Errors</h3>
+
+                <p>
+        The algorithms described in this specification, as well as in various cryptographic
+        suite specifications, throw specific types of errors. Implementers might find
+        it useful to convey these errors to other libraries or software systems. This
+        section provides specific URLs and descriptions for the errors,
+        such that an ecosystem implementing technologies described by this
+        specification might interoperate more effectively when errors occur.
+                </p>
+
+                <p>
+        When exposing these errors through an HTTP interface, implementers SHOULD use
+        [[RFC9457]] to encode the error data structure as a <dfn>ProblemDetails</dfn>
+        [=map=]. If [[RFC9457]] is used:
+                </p>
+
+                <ul>
+                <li>
+        The `type` value of the error object MUST be a URL that starts with the value
+        `https://w3id.org/security#` and ends with the value in the section listed
+        below.
+                </li>
+                <li>
+        The `title` value SHOULD provide a short but specific human-readable [=string=] for
+        the error.
+                </li>
+                <li>
+        The `detail` value SHOULD provide a longer human-readable [=string=] for the error.
+                </li>
+                </ul>
+
+                <dl>
+                <dt id="PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</dt>
+                <dd>
+        A request to generate a proof failed. See Section [[[#add-proof]]], and Section
+        [[[#add-proof-set-chain]]].
+                </dd>
+                <dt id="PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</dt>
+                <dd>
+        An error was encountered during proof verification. See Section [[[#verify-proof]]].
+                </dd>
+                <dt id="PROOF_TRANSFORMATION_ERROR">PROOF_TRANSFORMATION_ERROR </dt>
+                <dd>
+        An error was encountered during the transformation process.
+                </dd>
+                <dt id="INVALID_DOMAIN_ERROR">INVALID_DOMAIN_ERROR</dt>
+                <dd>
+        The `domain` value in a proof did not match the expected value. See Section
+        [[[#verify-proof]]].
+                </dd>
+                <dt id="INVALID_CHALLENGE_ERROR">INVALID_CHALLENGE_ERROR</dt>
+                <dd>
+        The `challenge` value in a proof did not match the expected value. See Section
+        [[[#verify-proof]]].
+                </dd>
+                </dl>
+        </section>
       </section>
 
-      <section class="normative">
-        <h3>Context Validation</h3>
-
-        <p>
-The following algorithm provides one mechanism that can be used to ensure that
-an application understands the contexts associated with a document before it
-executed business rules specific to the input in the document. For more
-rationale related to this algorithm, see Section [[[#validating-contexts]]].
-This algorithm takes inputs of a document ([=map=] |inputDocument|), a set of
-known JSON-LD Contexts ([=list=] |knownContext|), and a boolean to
-recompact when unknown contexts are detected ([=boolean=] |recompact|).
-        </p>
-
-        <p>
-This algorithm returns a <dfn class="lint-ignore">context validation result</dfn>,
-a [=struct=] whose [=struct/items=] are:
-        </p>
-        <dl data-dfn-for="context validation result">
-          <dt><dfn data-dfn-for="context validation result">validated</dfn></dt>
-          <dd>`true` or `false`</dd>
-          <dt><dfn data-dfn-for="context validation result" class="lint-ignore">validatedDocument</dfn></dt>
-          <dd>
-<a data-cite="INFRA#nulls">Null</a>, if [=context validation result/validated=] is
-`false`; otherwise, an [=input document=]
-          </dd>
-          <dt><dfn data-dfn-for="context validation result" class="lint-ignore">warnings</dfn></dt>
-          <dd>
-a [=list=] of [=ProblemDetails=], which defaults to an empty [=list=]
-          </dd>
-          <dt><dfn data-dfn-for="context validation result" class="lint-ignore">errors</dfn></dt>
-          <dd>
-a [=list=] of [=ProblemDetails=], which defaults to an empty [=list=]
-          </dd>
-        </dl>
-
-        <p>
-The context validation algorithm is as follows:
-        </p>
-
-        <ol class="algorithm">
-          <li>
-Set |result|.|validated| to `false`, |result|.|warnings| to an empty list,
-|result|.|errors| to an empty list, |compactionContext| to an empty list;
-and clone |inputDocument| to |result|.|validatedDocument|.
-          </li>
-          <li>
-Let |contextValue| be the value of the `@context` property of |result|.|validatedDocument|,
-which might be undefined.
-          </li>
-          <li>
-If |contextValue| does not deeply equal |knownContext|, any subtree in
-|result|.|validatedDocument| contains an `@context` property, or any URI in
-|contextValue| dereferences to a JSON-LD Context file that does not match a
-known good value or cryptographic hash, then perform the applicable action:
-            <ol class="algorithm">
-              <li>
-If |recompact| is `true`, set |result|.|validatedDocument| to the result
-of running the <a data-cite="JSON-LD11-API#compaction-algorithm">
-JSON-LD Compaction Algorithm</a> with the |inputDocument| and
-|knownContext| as inputs. If the compaction fails, add at least one error
-to |result|.|errors|.
-              </li>
-              <li>
-If |recompact| is not `true`, add at least one error to |result|.|errors|.
-              </li>
-            </ol>
-          </li>
-          <li>
-If |result|.|errors| is empty, set |result|.|validated| to `true`; otherwise, set
-|result|.|validated| to `false`, and remove the |document| property from |result|.
-          </li>
-          <li>
-Return the value of |result|.
-          </li>
-        </ol>
-
-        <p>
-Implementations MAY include additional warnings or errors that enforce
-further validation rules that are specific to the implementation or a
-particular use case.
-        </p>
-
-      </section>
-
-      <section class="normative">
-        <h3>Processing Errors</h3>
-
-        <p>
-The algorithms described in this specification, as well as in various cryptographic
-suite specifications, throw specific types of errors. Implementers might find
-it useful to convey these errors to other libraries or software systems. This
-section provides specific URLs and descriptions for the errors,
-such that an ecosystem implementing technologies described by this
-specification might interoperate more effectively when errors occur.
-        </p>
-
-        <p>
-When exposing these errors through an HTTP interface, implementers SHOULD use
-[[RFC9457]] to encode the error data structure as a <dfn>ProblemDetails</dfn>
-[=map=]. If [[RFC9457]] is used:
-        </p>
-
-        <ul>
-          <li>
-The `type` value of the error object MUST be a URL that starts with the value
-`https://w3id.org/security#` and ends with the value in the section listed
-below.
-          </li>
-          <li>
-The `title` value SHOULD provide a short but specific human-readable [=string=] for
-the error.
-          </li>
-          <li>
-The `detail` value SHOULD provide a longer human-readable [=string=] for the error.
-          </li>
-        </ul>
-
-        <dl>
-          <dt id="PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</dt>
-          <dd>
-A request to generate a proof failed. See Section [[[#add-proof]]], and Section
-[[[#add-proof-set-chain]]].
-          </dd>
-          <dt id="PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</dt>
-          <dd>
-An error was encountered during proof verification. See Section [[[#verify-proof]]].
-          </dd>
-          <dt id="PROOF_TRANSFORMATION_ERROR">PROOF_TRANSFORMATION_ERROR </dt>
-          <dd>
-An error was encountered during the transformation process.
-          </dd>
-          <dt id="INVALID_DOMAIN_ERROR">INVALID_DOMAIN_ERROR</dt>
-          <dd>
-The `domain` value in a proof did not match the expected value. See Section
-[[[#verify-proof]]].
-          </dd>
-          <dt id="INVALID_CHALLENGE_ERROR">INVALID_CHALLENGE_ERROR</dt>
-          <dd>
-The `challenge` value in a proof did not match the expected value. See Section
-[[[#verify-proof]]].
-          </dd>
-        </dl>
-      </section>
+      
     </section>
 
     <section>
