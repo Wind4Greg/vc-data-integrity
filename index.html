@@ -103,7 +103,7 @@
           // document unless you know what you're doing. If in doubt ask your friendly neighbourhood
           // Team Contact.
           //wgPatentURI:  "",
-          maxTocLevel: 3,
+          maxTocLevel: 4,
           /*preProcess: [ ],
           alternateFormats: [ {uri: "diff-20111214.html", label: "diff to previous version"} ],
           */
@@ -1832,67 +1832,67 @@ efficient ecosystem.
         </p>
 
         <section class="normative">
-                <h4>Processing Model</h4>
+          <h4>Processing Model</h4>
 
-                <p>
+          <p>
 The processing model used by a [=conforming processor=] and its
 application-specific software is described in this section. When software
 is to ensure information is tamper-evident, it performs the following steps:
-                </p>
+          </p>
 
-                <ol>
-                <li>
+          <ol>
+          <li>
 The software arranges the information into a document, such as a JSON or
 JSON-LD document.
-                </li>
-                <li>
+          </li>
+          <li>
 If the document is a JSON-LD document, the software selects one or more
 JSON-LD Contexts and expresses them using the `@context` property.
-                </li>
-                <li>
+          </li>
+          <li>
 The software selects one or more cryptography suites that meet the needs of
 the use case, such as one that provides full, selective, or unlinkable
 disclosure, using acceptable cryptographic key material.
-                </li>
-                <li>
+          </li>
+          <li>
 The software uses the applicable algorithm(s) provided in Section [[[#add-proof]]]
 or Section [[[#add-proof-set-chain]]] to add one or more proofs.
-                </li>
-                </ol>
+          </li>
+          </ol>
 
-                <p>
+          <p>
 When software needs to use information that was transmitted to it using
 a mechanism described by this specification, it performs the following steps:
-                </p>
+          </p>
 
-                <ol>
-                <li>
+          <ol>
+          <li>
 The software transforms the incoming data into a document that can be understood
 by the applicable algorithm provided in Section [[[#verify-proof]]] or Section
 [[[#verify-proof-sets-and-chains]]].
-                </li>
-                <li>
+          </li>
+          <li>
 The software uses JSON Schema or an equivalent mechanism to validate that the
 incoming document follows an expected schema used by the application.
-                </li>
-                <li>
+          </li>
+          <li>
 The software uses the applicable algorithm(s) provided in Section [[[#verify-proof]]]
 or Section [[[#verify-proof-sets-and-chains]]] to verify the integrity of the
 incoming document.
-                </li>
-                <li>
+          </li>
+          <li>
 If the document is a JSON-LD document, the software uses the algorithm provided
 in Section [[[#context-validation]]], or one providing equivalent protections,
 to validate all JSON-LD Context values used in the document.
-                </li>
-                </ol>
+          </li>
+          </ol>
 
         </section>
 
         <section class="normative">
-                <h4>Add Proof</h4>
+          <h4>Add Proof</h4>
 
-                <p>
+          <p>
 The following algorithm specifies how a digital proof can be added to an [=input
 document=], and can then be used to verify the output document's authenticity
 and integrity. Required inputs are an [=input document=] ([=map=]
@@ -1900,42 +1900,42 @@ and integrity. Required inputs are an [=input document=] ([=map=]
 set of options ([=map=] |options|). Output is a [=secured data document=]
 ([=map=]) or an error. Whenever this algorithm encodes strings, it MUST use
 UTF-8 encoding.
-                </p>
+          </p>
 
-                <ol class="algorithm">
-                <li>
+          <ol class="algorithm">
+            <li>
 Let |proof| be the result of calling the [=cryptosuite instance/createProof=]
 algorithm specified in |cryptosuite|.|createProof| with |inputDocument|
 and |options| passed as a parameters. If the algorithm produces an error,
 the error MUST be propagated and SHOULD convey the error type.
-                </li>
-                <li>
+            </li>
+            <li>
 If one or more of the |proof|.|type|, |proof|.|verificationMethod|, and
 |proof|.|proofPurpose| values is not set, an error MUST be raised and SHOULD
 convey an error type of
 <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-                </li>
-                <li>
+            </li>
+            <li>
 If |options| has a non-null |domain| [=struct/item=], it MUST be equal to
 |proof|.|domain| or an error MUST be raised and SHOULD convey
 an error type of <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-                </li>
-                <li>
+            </li>
+            <li>
 If |options| has a non-null |challenge| [=struct/item=], it MUST be equal to
 |proof|.|challenge| or an error MUST be raised and SHOULD
 convey an error type of
 <a href="#PROOF_GENERATION_ERROR">PROOF_GENERATION_ERROR</a>.
-                </li>
-                <li>
+            </li>
+            <li>
 Let |securedDataDocument| be a copy of |inputDocument|.
-                </li>
-                <li>
+            </li>
+            <li>
 Set |securedDataDocument|.|proof| to the value of |proof|.
-                </li>
-                <li>
+            </li>
+            <li>
 Return |securedDataDocument| as the [=secured data document=].
-                </li>
-                </ol>
+            </li>
+            </ol>
 
         </section>
         <section>
@@ -2007,13 +2007,13 @@ Return |output| as the new [=secured data document=].
         </section>
 
         <section>
-                <h4>Verify Proof</h4>
+          <h4>Verify Proof</h4>
 
-                <p>
+          <p>
 The following algorithm specifies how to check the authenticity and integrity of
 a [=secured data document=] by verifying its digital proof. The algorithm
 takes as input:
-                </p>
+          </p>
 
                 <dl>
                 <dt>|mediaType|</dt>
@@ -2381,7 +2381,419 @@ Return |combinedVerificationResult|, |successfulVerificationResults|.
         </section>
       </section>
 
-      
+      <section id="CryptosuiteCommonAlgorithms">
+        <h3>Cryptosuite Common Algorithms</h3>
+        <section class="informative">
+          <h4>Introduction</h4>
+          <p class="ednote">
+These algorithms are for the non-selective disclosure case.  There are 
+two key algorithms which are built from a common set of functions. These
+are "Create Proof" and "Verify Proof" which are called by the [[[#add-proof]]] 
+and [[[#verify-proof]]] general algorithms respectively. 
+These algorithms have a common 
+structure for all non-selective disclosure cryptosuites. We give these 
+algorithms in the following two sections along with the common functions
+that are used therein.
+May want to explain all the parameters here, i.e., canonicalization
+scheme, hash function, signature function, verification function, and
+proof encoding.
+          </p>
+        </section>
+        <section>
+          <h4>Create Proof</h4>
+
+          <p>
+The following algorithm specifies how to create a [=data integrity proof=] given
+an <a>unsecured data document</a> and properly specified cryptosuite. 
+The choice of cryptosuite sets the values of |canonScheme|,
+|hashName|, |sigFunc|, |verifyFunc|, and |proofEncoding|, which are used
+in the algorithm below. Additional required inputs are an
+<a>unsecured data document</a> ([=map=] |unsecuredDocument|), and a set of proof
+options ([=map=] |options|). A [=data integrity proof=] ([=map=]), or an error,
+is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Let |proof| be a clone of the proof options, |options|.
+                </li>
+                <li>
+        Let |proofConfig| be the result of running the algorithm in
+        Section [[[#ProofConfigurationAlg]]] with
+        |options|, the |cypherSuiteName|, |canonScheme|, and |hashName|
+        passed as parameters.
+                </li>
+                <li>
+        Let |transformedData| be the result of running the algorithm in Section
+        [[[#TransformationAlg]]] with |unsecuredDocument|, |options|, the
+        |cypherSuiteName|, |canonScheme|, and |hashName| passed as parameters.
+                </li>
+                <li>
+        Let |hashData| be the result of running the algorithm in Section
+        [[[#HashingAlg]]] with |transformedData|, |proofConfig|, and |hashName|
+        passed as a parameters.
+                </li>
+                <li>
+        Let |proofBytes| be the result of running the algorithm in Section
+        [[[#ProofSerializationAlg]]] with |hashData|, |options|, and
+        |sigFunc| passed as parameters.
+                </li>
+                <li>
+        Let |proof|.|proofValue| be a <a data-cite="CID#multibase-0">
+        base64-url-encoded Multibase encoding</a> of the |proofBytes| if 
+        |proofEncoding| is  `base64` otherwise let |proof|.|proofValue|
+        be a <a data-cite="CID#multibase-0">
+        base58-btc-encoded Multibase value</a> of the |proofBytes| if
+        |proofEncoding| is `base58`.
+                </li>
+                <li>
+        Return |proof| as the [=data integrity proof=].
+                </li>
+                </ol>
+
+        </section>
+        <section>
+                <h4>Verify Proof</h4>
+
+                <p>
+        The following algorithm specifies how to verify a [=data integrity proof=] given
+        an <a>secured data document</a>. Required inputs are an
+        <a>secured data document</a> ([=map=] |securedDocument|). This algorithm returns
+        a <dfn>verification result</dfn>, which is a [=struct=] whose
+        [=struct/items=] are:
+                </p>
+                <dl>
+                <dt><dfn data-dfn-for="verification result">verified</dfn></dt>
+                <dd>`true` or `false`</dd>
+                <dt><dfn data-dfn-for="verification result">verifiedDocument</dfn></dt>
+                <dd>
+        <a data-cite="INFRA#nulls">Null</a>, if [=verification result/verified=] is
+        `false`; otherwise, an [=unsecured data document=]
+                </dd>
+                </dl>
+
+                <ol class="algorithm">
+                <li>
+        Let |unsecuredDocument| be a copy of |securedDocument| with
+        the `proof` value removed.
+                </li>
+                <li>
+        Let |proofOptions| be a copy of |securedDocument|.|proof| with `proofValue`
+        removed.
+                </li>
+                <li>
+        Set |cryptosuiteName| to |securedDocument|.|proof|.|cryptosuite|,
+        which must be one of specified cryptosuites.
+        From the cryptosuite specification, set the values of |canonScheme|, |hashName|,
+        |verifyFunc|, and |proofEncode|.
+                </li>
+                <li>
+        Let |proofBytes| be the
+        <a data-cite="CID#multibase-0">Multibase decoded base64-url
+        value</a> in |securedDocument|.|proof|.|proofValue| if |proofEncode| is
+        `base64` otherwise let |proofBytes| be the
+        <a data-cite="CID#multibase-0">Multibase decoded base58-btc
+        value</a>.
+                </li>
+                <li>
+        Let |transformedData| be the result of running the algorithm in Section
+        [[[#TransformationAlg]]] with |unsecuredDocument|,
+        and |cypherSuiteName|,
+        |canonScheme|, and |hashName| |proofOptions| passed as parameters.
+                </li>
+                <li>
+        Let |proofConfig| be the result of running the algorithm in
+        Section [[[#ProofConfigurationAlg]]] with |options|, |cypherSuiteName|,
+        |canonScheme|, and |hashName| passed as parameters.
+                </li>
+                <li>
+        Let |hashData| be the result of running the algorithm in Section
+        [[[#HashingAlg]]] with |transformedData|, |proofConfig|, and |hashName|
+        passed as a parameters.
+                </li>
+                <li>
+        Let |verified:boolean| be the result of running the algorithm in Section
+        [[[#ProofVerificationAlg]]] with |hashData|,
+        |proofBytes|, |proofConfig|, and |verifyFunc| as parameters.
+                </li>
+                <li>
+        Return a [=verification result=] with [=struct/items=]:
+                <dl data-link-for="verification result">
+                        <dt>[=verified=]</dt>
+                        <dd>|verified|</dd>
+                        <dt>[=verifiedDocument=]</dt>
+                        <dd>
+        |unsecuredDocument| if |verified| is `true`, otherwise <a data-cite="INFRA#nulls">Null</a></dd>
+                </dl>
+                </li>
+                </ol>
+
+        </section>
+        
+        <section>
+                <h4>Common Functions</h4>
+                <section id="HashingAlg">
+                <h5>Hashing</h5>
+
+                <p>
+        The following algorithm specifies how to cryptographically hash a
+        <em>transformed data document</em> and <em>proof configuration</em>
+        into cryptographic hash data that is ready to be provided as input to the
+        algorithms for proof serialization and proof verification of each of the
+        respective cryptosuites.
+                </p>
+
+                <p>
+        The required inputs to this algorithm are a <em>transformed data document</em>
+        (|transformedDocument|), <em>canonical proof configuration</em>
+        (|canonicalProofConfig|), and <em>hash name</em> (|hashName|). A single
+        <em>hash data</em> value represented as a series of bytes is produced as output.
+                </p>
+
+                <ol class="algorithm">
+                <li>
+        If |hashName| is `SHA-256`,
+        let |transformedDocumentHash| be the result of applying the
+        SHA-256 (SHA-2 with 256-bit output)
+        cryptographic hashing algorithm [[RFC6234]] to the
+        respective |transformedDocument|.
+        Respective |transformedDocumentHash| will be exactly 32 bytes
+        in size.
+                </li>
+                <li>
+        If |hashName| is `SHA-384`,
+        let |transformedDocumentHash| be the result of applying the
+        SHA-384 (SHA-2 with 384-bit output)
+        cryptographic hashing algorithm [[RFC6234]] to the
+        respective |transformedDocument|.
+        Respective |transformedDocumentHash| will be exactly 48 bytes
+        in size.
+                </li>
+                <li>
+        If |hashName| is `SHA-512`,
+        let |transformedDocumentHash| be the result of applying the
+        SHA-512 (SHA-2 with 512-bit output)
+        cryptographic hashing algorithm [[RFC6234]] to the
+        respective |transformedDocument|.
+        Respective |transformedDocumentHash| will be exactly 64 bytes
+        in size.
+                </li>
+                <li>
+        If |hashName| is `SHA-256`,
+        let |proofConfigHash| be the result of applying the
+        SHA-256 (SHA-2 with 256-bit output)
+        cryptographic hashing algorithm [[RFC6234]] to the
+        |canonicalProofConfig|. Respective |proofConfigHash|
+        will be exactly 32 bytes in size.
+                </li>
+                <li>
+        If |hashName| is `SHA-384`,
+        let |proofConfigHash| be the result of applying the
+        SHA-384 (SHA-2 with 384-bit output)
+        cryptographic hashing algorithm [[RFC6234]] to the
+        |canonicalProofConfig|. Respective |proofConfigHash|
+        will be exactly 48 bytes in size.
+                </li>
+                <li>
+        If |hashName| is `SHA-512`,
+        let |proofConfigHash| be the result of applying the
+        SHA-512 (SHA-2 with 512-bit output)
+        cryptographic hashing algorithm [[RFC6234]] to the
+        |canonicalProofConfig|. Respective |proofConfigHash|
+        will be exactly 64 bytes in size.
+                </li>
+                <li>
+        Let |hashData| be the result of joining |proofConfigHash| (the
+        first hash) with |transformedDocumentHash| (the second hash).
+                </li>
+                <li>
+        Return |hashData| as the <em>hash data</em>.
+                </li>
+                </ol>
+
+                </section>
+                <section id="ProofConfigurationAlg">
+                <h5>Proof Configuration</h5>
+
+                <p>
+        The following algorithm specifies how to generate a
+        <em>proof configuration</em> from a set of <em>proof options</em>
+        that is used as input to the <a href="#HashingAlg">proof hashing algorithm</a>.
+                </p>
+
+                <p>
+        The required inputs to this algorithm are <em>proof options</em>
+        (|options|), a <em>cryptosuite identifier</em> (|cryptosuite|), the
+        <em>canonicalization scheme </em> (|canonScheme|) and <em>hash name</em>
+        (|hashName|). The
+        <em>proof options</em> MUST contain a type identifier
+        for the
+        <a data-cite="vc-data-integrity#dfn-cryptosuite">
+        cryptographic suite</a> (|type|) and MUST contain the cryptosuite
+        identifier (|cryptosuite|). A <em>proof configuration</em>
+        object is produced as output.
+                </p>
+
+                <ol class="algorithm">
+                <li>
+        Let |proofConfig| be a clone of the |options| object.
+                </li>
+                <li>
+        If |proofConfig|.|type| is not set to `DataIntegrityProof`,
+        |proofConfig|.|cryptosuite| is not set to the <em>cryptosuite</em>,
+        or both, an `INVALID_PROOF_CONFIGURATION` error MUST be raised.
+                </li>
+                <li>
+        If |proofConfig|.|created| is set to a value that is not a
+        valid [[XMLSCHEMA11-2]] datetime, an `INVALID_PROOF_DATETIME` error MUST be
+        raised.
+                </li>
+                <li>
+        Set |proofConfig|.|@context| to |unsecuredDocument|.|@context|.
+                </li>
+                <li>
+        If |canonScheme| is `rdfc`,
+        let |canonicalProofConfig| be the result of applying the
+        Universal RDF Dataset Canonicalization Algorithm
+        [[RDF-CANON]] to the |proofConfig|, with hashing parameter set to |hashName|.
+                </li>
+                <li>
+        If |canonScheme| is `jcs`,
+        let |canonicalProofConfig| be the result of applying the
+        JSON Canonicalization Scheme [[RFC8785]] to the |proofConfig|.
+                </li>
+                <li>
+        Return |canonicalProofConfig|.
+                </li>
+                </ol>
+                </section>
+                <section id="TransformationAlg">
+                <h5>Transformation</h5>
+
+                <p>
+        The following algorithm specifies how to transform an unsecured input document
+        into a transformed document that is ready to be provided as input to the
+        hashing algorithm in Section [[[#HashingAlg]]].
+                </p>
+
+                <p>
+        Required inputs to this algorithm are an
+        <a data-cite="vc-data-integrity#dfn-unsecured-data-document">
+        unsecured data document</a> (|unsecuredDocument|),
+        transformation options (|options|), a cryptosuite identifier (|cryptosuite|),
+        the <em>canonicalization scheme </em> (|canonScheme|) and <em>hash name</em>
+        (|hashName|). The
+        transformation options MUST contain a type identifier for the
+        <a data-cite="vc-data-integrity#dfn-cryptosuite">
+        cryptographic suite</a> (|type|) and a cryptosuite
+        identifier (|cryptosuite|). A <em>transformed data document</em> is
+        produced as output. Whenever this algorithm encodes strings, it MUST use UTF-8
+        encoding.
+                </p>
+
+                <ol class="algorithm">
+                <li>
+        If |options|.|type| is not set to the string `DataIntegrityProof`,
+        |options|.|cryptosuite| is not set to the <em>cryptosuite</em>
+        value, or both, then a `PROOF_TRANSFORMATION_ERROR` MUST be
+        raised.
+                </li>
+                <li>
+        If |canonScheme| is `rdfc`,
+        let |canonicalDocument| be the result of applying the
+        Universal RDF Dataset Canonicalization Algorithm
+        [[RDF-CANON]] to the |unsecuredDocument|
+        with hashing parameter set to |hashName|.
+                </li>
+                <li>
+        If |canonScheme| is `jcs`,
+        let |canonicalDocument| be the result of applying the
+        JSON Canonicalization Scheme [[RFC8785]] to the |unsecuredDocument|.
+                </li>
+                <li>
+        Set |output| to the value of |canonicalDocument|.
+                </li>
+                <li>
+        Return |canonicalDocument| as the <em>transformed data document</em>.
+                </li>
+                </ol>
+                </section>
+                <section id="ProofSerializationAlg">
+                <h4>Proof Serialization</h4>
+                <p>
+        The following algorithm specifies how to serialize a digital signature from
+        a set of cryptographic hash data. This
+        algorithm is designed to be used in conjunction with the algorithms defined
+        in <a data-cite="vc-data-integrity#algorithms">
+        Section 4: Algorithms</a> of the Data Integrity specification
+        [[VC-DATA-INTEGRITY]]. Required inputs are
+        cryptographic hash data (|hashData|), <em>proof options</em> (|options|), and
+        a <em>signature function</em> (|sigFunc|). The
+        <em>proof options</em> MUST contain a type identifier for the
+        <a data-cite="vc-data-integrity#dfn-cryptosuite"
+        >cryptographic suite</a> (|type|) and MAY contain a cryptosuite
+        identifier (|cryptosuite|). A single <em>digital proof</em> value
+        represented as series of bytes is produced as output.
+                </p>
+
+                <ol class="algorithm">
+                <li>
+        Let |privateKeyBytes| be the result of retrieving the
+        private key bytes (or a signing interface enabling the use of the private key
+        bytes) associated with the verification method identified by the
+        |options|.|verificationMethod| value.
+                </li>
+                <li>
+        Let |proofBytes| be the result of applying the |sigFunc|, with |hashData| as
+        the data
+        to be signed using the private key specified by |privateKeyBytes|.
+        |proofBytes| will have a length as indicated by the cryptosuite.
+                </li>
+                <li>
+        Return |proofBytes| as the <em>digital proof</em>.
+                </li>
+                </ol>
+                </section>
+
+                <section id="ProofVerificationAlg">
+                <h4>Proof Verification</h4>
+
+                <p>
+        The following algorithm specifies how to verify a digital signature from
+        a set of cryptographic hash data. This
+        algorithm is designed to be used in conjunction with the algorithms defined
+        in <a data-cite="vc-data-integrity#algorithms">Section 4: Algorithms</a>
+        of the Data Integrity [[VC-DATA-INTEGRITY]]
+        specification. Required inputs are
+        cryptographic hash data (|hashData|), a digital signature (|proofBytes|),
+        proof options (|options|), and a <em>verification function</em> (|verifyFunc|).
+        A <em>verification result</em>
+        represented as a boolean value is produced as output.
+                </p>
+
+                <ol class="algorithm">
+                <li>
+        Let |publicKeyBytes| be the result of retrieving the
+        public key bytes associated with the
+        |options|.|verificationMethod| value as described in
+        <a data-cite="vc-data-integrity#algorithms"> Section
+        4: Retrieve Verification Method</a> of the
+        Data Integrity specification [[VC-DATA-INTEGRITY]].
+                </li>
+                <li>
+        Let |verificationResult| be the result of applying the |verifyFunc|,
+        using the public key specified by |publicKeyBytes|, with |hashData|
+        as the data to be verified against the
+        |proofBytes|.
+                </li>
+                <li>
+        Return |verificationResult| as the <em>verification result</em>.
+                </li>
+                </ol>
+
+                </section>
+        </section>
+        </section>
     </section>
 
     <section>
