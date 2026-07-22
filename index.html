@@ -2797,15 +2797,10 @@ Return |verificationResult| as the <em>verification result</em>.
         </section>
       </section>
     </section>
-    <section id="GeneralSelectiveDisclosure">
+    <section id="GeneralSelectiveDisclosure" >
       <h2>Selective  Disclosure</h2>
-      <section>
+      <section  class="informative">
         <h3>Introduction</h3>
-        <p class="ednote">
-Here we need to explain how selective disclosure is a privacy enhancing 
-technology. Include benefits to the holder, constraints from the issuer,
-and guarantees to the verifier. Below is a definition of selective disclosure.
-        </p>
         <p>
 From the [[[VC-DATA-MODEL-2.0]]], a verifiable credential is a set of one or 
 more claims 
@@ -2840,11 +2835,22 @@ constraints</em>. Though it is typically the responsibility of the verifier to
 indicate what claims they want to verify.
         </p>
       </section>
-      <section>
+      <section class="informative">
         <h3>How it  Works</h3>
-        <p class="ednote">
-Here we explain the steps for base proof creation, derived proof 
-creation, and derived proof verification.
+        <p>
+In Section [[[#how-it-works]]] the fundamental processes of creating and verifying a  
+cryptographic proof are explained. In the case  of selective disclosure there 
+are three processes rather than two: (1) issuer creates a base proof, (2) holder 
+creates a derived proof from the base proof, and  (3) verifier verifies a 
+derived proof.  The reasoning for this extra step is that methods for creating
+a derived proof are much more efficient when used in combination with a base
+proof created in a particular manner.
+        </p>
+        <p>
+In [[[#hiw-base-creation]]] the issuer performs the steps of transformation,
+hashing, and base proof generation to produce the <em>data with base proof</em>.
+The imposition of mandatory disclosure constraints is optional and, more 
+typically reveal requirements would come from the verifier.
         </p>
         <figure id="hiw-base-creation">
           <img style="margin: auto; display: block; width: 100%;"
@@ -2855,7 +2861,16 @@ transformed subject to manditory disclosure constraints, hashed, and
 cryptographically protected.
           </figcaption>
         </figure>
-
+        <p>
+In [[[#hiw-derived-creation]]] the holder get to specify what subset of 
+information gets revealed to the verifier via the selective disclosure
+constraints. These are used to produce a derived credential via transformation
+and derived proof generation steps. These are carried out in such a way as to
+preserve the authenticty and integrity of the derived data with repect to the
+issuers intent.  The selective disclosure constraints would be typically set to
+meet the minimum requirements of acceptance of the derived credential by 
+the verifier.
+        </p>
         <figure id="hiw-derived-creation">
           <img style="margin: auto; display: block; width: 100%;"
                src="diagrams/hiw-derived-creation.svg" alt="TODO">
@@ -2865,7 +2880,10 @@ together with a base proof is transformed subject to selective disclosure
 constraints, and appropriate cryptograph processing.
           </figcaption>
         </figure>
-
+        <p>
+Finally, in [[[#hiw-derived-verification]]] the process of verifying the 
+selectively disclosed data is shown.
+        </p>
         <figure id="hiw-derived-verification">
           <img style="margin: auto; display: block; width: 100%;"
                src="diagrams/hiw-derived-verification.svg" alt="TODO">
