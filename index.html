@@ -2794,6 +2794,108 @@ Let |proof| be a clone of the proof options, |options|.
                 </section>
         </section>
         </section>
+
+        <section>
+          <h3>Selective Disclosure Algorithms</h3>
+          <section class="informative">
+        <h3>Selective Disclosure Approaches</h3>
+        <p>
+In this section we give an overview of three different approaches to selective
+disclosure that work primarily at the level of the <em>claims</em> within a
+verifiable credential, that is, allowing the holder to selectively disclose, or
+not, a  particular claim from a credential. The three approaches take into
+account the efficiency of the fundamental cryptographic signature algorithm 
+used. Only one, almost standardized,  cryptographic signature algorithm, BBS,
+natively supports selective disclosure, i.e., it produces a base signature over
+an ordered list of claims, and facilitates the creation of a "derived 
+signature" over a subset of that list of claims. For other cryptographic 
+signature algorithms two approaches are typically used: (1) provide individual 
+signatures for each claim, or (2) sign a list of "salted hashes" for all 
+claims. The first we  will refer to as SIC (Sign Individual Claims), the second
+SHoC (Salted Hashes of Claims), and the case where the signature algorithm 
+naturally supports multiple claims - MCS (Multiple Claim Support).
+        </p>
+        <p>
+All approaches utilize similar mechanisms to protect the proof related meta 
+data, and minimize data leakage of non-disclosed information from the derived 
+proof. They all incur roughly similar overhead in the base and derived proofs
+for these purposes. Similarly, all approaches utilize the same encoding of the
+individual data items that go into a proof, CBOR, and the final encoding of raw
+octets into a string, base64-url. Hence this information is not shown in the
+summary [[[#SDApproachTable]]].
+        </p>
+        <p>
+The SIC approaches signs individual claims after the transformation step.
+Hence its base proof size scales as the number of claims times the size of the 
+signature produced by the chosen signature algorithm. Hence this approach is
+good for signature algorithms that produce small signatures. The size of the
+derived proof scales as the number of revealed claims times the signature size.
+This is a nice property, not shared by the other two approaches, i.e., the
+fewer claims reveal the smaller the proof.
+        </p>
+        <p>
+In the SHoC a salt value, random nonce, is created for each claim, that salt  
+value is concatenated with the claim and a cryptographic collision 
+resistant hash function is applied to produce a list of hashes, one for each
+claim.  The lists of salts and hashes are combined and signed with a selected 
+signature algorithm. Only one signature is needed, hence this aproach is good 
+for signature algorithms with larger signature sizes. The downside is that the 
+complete list of salts and hashes must be conveyed to the holder and verifier. 
+To verify a revealed claim the verifier would first verify the signature for the
+combined list of salts and hashes, then they must be told the index of the claim 
+in the list of salts and hashes, then using the appropriate salt value from the
+list they verify the value of hash of the salt concatenated with the received 
+claim and the hash from the table.
+        </p>
+        <p>
+In one MCS (Multi  Claim  Support) signature algorithm case, BBS, the produced 
+base proof is extremely short, 80 bytes. While the derived proof grows as 32 
+bytes per non-revealed claim.
+        </p>
+
+        <p>
+We sumarize the properties of these approaches in 
+[[[#SDApproachTable]]]. 
+        </p>
+        <table id="SDApproachTable" class="data numbered">
+          <caption><em>Selective Disclosure Approaches.</em> </caption>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Base Proof Contents</th>
+            <th>Base Proof Size</th>
+            <th>Derived Proof Contents</th>
+            <th>Derived Proof Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Signed Individual Claims (SIC)</td>
+            <td>list of signatures, one for each claim.</td>
+            <td>N<sub>claims</sub> &times; (signature size) </td>
+            <td>sub-list of signatures, one for each revealed claim.</td>
+            <td>N<sub>revealed claims</sub> &times; (signature size) </td>
+          </tr>
+          <tr>
+            <td>Signed Hash of Claims (SHoC)</td>
+            <td>list of salts, list of salted hashes, one for each claim, 
+              plus signature over these two lists.</td>
+            <td>N<sub>claims</sub> &times; (salt size + hash size) + signature size</td>
+            <td>list of salts, list of salted hashes, one for each claim, 
+              plus one signature over these two lists.</td>
+            <td>N<sub>claims</sub> &times; (salt size + hash size) + signature size</td>
+          </tr>
+          <tr>
+            <td>Multi Claim Signature, BBS</td>
+            <td>BBS signature</td>
+            <td>80 bytes</td>
+            <td>BBS <em>proof</em></td>
+            <td>272 + 32 &times;  (N<sub>claims</sub> - N<sub>revealed claims</sub>) bytes</td>
+          </tr>
+        </tbody>
+      </table>
+      </section>
+        </section>
     </section>
 
     <section>
