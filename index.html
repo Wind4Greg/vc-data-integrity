@@ -3003,10 +3003,10 @@ value, represented as an object, is produced as output.
           <ol>
             <li>
 Initialize the |proofData| object to the result returned from the approach  
-specific <em>PaseBase</em> sub-algorithm. For example, for the SIC approach 
+specific <em>ParseBase</em> sub-algorithm. For example, for the SIC approach 
 use [[[#ParseBase-SIC]]] and for the SHoC approach use [[[#ParseBase-SHoC]]].
 At a minimum the |proofData| object will contain the following fields: 
-|hmacKey|, |mandatoryPointers|
+|hmacKey| and |mandatoryPointers|.
             </li>
             <li>
 Initialize |disclosureData| to the object returned when calling the algorithm in
@@ -3043,6 +3043,60 @@ Return |revealDocument| as the <em>selectively revealed document</em>.
 This procedure can  be decomposed into: (a) approach specific "parse derived proof"
 (b) generic "create verify data", and (c) approach specific verification procedure.
           </p>
+          <p class="ednote">
+TODO: After precise defininitions of sub-algorithms, check all the parameter names,
+values, and return values for completeness and consistency.
+          </p>
+
+
+          <p>
+The following algorithm attempts verification of a selecitive disclosure derived
+proof. This algorithm is called by a verifier of an selective disclosure 
+protected [=verifiable credential=]. The inputs include a JSON-LD document
+(|document|), a selective disclosure derived proof (|proof|), and any
+custom JSON-LD API options, such as a document loader. This algorithm returns
+a [=verification result=]:
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Let |unsecuredDocument| be a copy of |document| with the `proof` value removed.
+            </li>
+            <li>
+Initialize the |proofData| object to the result returned from the approach  
+specific <em>ParseDerived</em> sub-algorithm. For example, for the SIC approach 
+use [[[#ParseDerived-SIC]]] and for the SHoC approach use [[[#ParseDerived-SHoC]]].
+At a minimum the |proofData| object will contain the following fields: 
+|labelMap| and |mandatoryIndexes|.
+            </li>            
+            <li>
+Initialize the |verifyData| object to the value returned when calling the 
+algorithm in Section [[[#CreateVerifyData]]], passing the |document|, 
+|proofData|, and any custom JSON-LD API options, such as a document loader.
+The |verifyData| object will contain the following fields: |proofHash|, 
+|mandatoryHash|, and |nonMandatory|.
+            </li>
+            <li>
+Initialize |verified| to the result of calling the approach specific 
+<em>VerifyDerived</em> algorithm. For example, for the SIC approach use  
+[[[#VerifyDerived-SIC]]] and  for the SHoC approach use 
+[[[#VerifyDerived-SHoC]]]. In all cases passing |proofData| and |verifyData| as
+parameters.
+            </li>
+            <li>
+Return a [=verification result=] with [=struct/items=]:
+              <dl data-link-for="verification result">
+                <dt>[=verified=]</dt>
+                <dd>The value of |verified|</dd>
+                <dt>[=verifiedDocument=]</dt>
+                <dd>
+|unsecuredDocument| if |verified| is `true`, otherwise <a
+data-cite="INFRA#nulls">Null</a>
+                </dd>
+              </dl>
+            </li>
+          </ol>
+
         </section>
 
       </section> <!-- Selective Disclosure  Algorithms-->
@@ -3058,7 +3112,7 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
         <section id="CreateDisclosureData">
           <h4>CreateDisclosureData</h4>
         </section>
-        <section>
+        <section id="CreateVerifyData">
           <h4>CreateVerifyData</h4>
         </section>
       </section>
@@ -3074,10 +3128,10 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
         <section id="SerializeDerived-SIC">
           <h4>SerializeDerived-SIC</h4>
         </section>
-        <section>
+        <section id="ParseDerived-SIC">
           <h4>ParseDerived-SIC</h4>
         </section>
-        <section>
+        <section id="VerifyDerived-SIC">
           <h4>VerifyDerived-SIC</h4>
         </section>
       </section>
@@ -3096,10 +3150,10 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
         <section id="SerializeDerived-SHoC">
           <h4>SerializeDerived-SHoC</h4>
         </section>
-        <section>
+        <section id="ParseDerived-SHoC">
           <h4>ParseDerived-SHoC</h4>
         </section>
-        <section>
+        <section id="VerifyDerived-SHoC">
           <h4>VerifyDerived-SHoC</h4>
         </section>
       </section>
