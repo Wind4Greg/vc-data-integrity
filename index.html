@@ -2983,6 +2983,58 @@ This general procedure can be decomposed into: (a) approach specific
 "parse base proof", (b) generic "create disclosure data", and (c) approach 
 specific "serialize derived proof value".
           </p>
+          <p class="ednote">
+TODO: After precise defininitions of sub-algorithms, check all the parameter names,
+values, and return values for completeness and consistency.
+          </p>
+
+          <p>
+The following algorithm creates a selective disclosure derived proof; called by
+a holder of a [=verifiable credential=] protected with a selective disclosure 
+'base proof'.
+The derived proof is to be given to the [=verifier=]. The inputs include a
+JSON-LD document (|document|), an selecitve disclosure base proof
+(|proof|), an array of JSON pointers to use to selectively disclose
+statements (|selectivePointers|), and any custom JSON-LD API options,
+such as a document loader. A single <em>selectively revealed document</em>
+value, represented as an object, is produced as output.
+          </p>
+
+          <ol>
+            <li>
+Initialize the |proofData| object to the result returned from the approach  
+specific <em>PaseBase</em> sub-algorithm. For example, for the SIC approach 
+use [[[#ParseBase-SIC]]] and for the SHoC approach use [[[#ParseBase-SHoC]]].
+At a minimum the |proofData| object will contain the following fields: 
+|hmacKey|, |mandatoryPointers|
+            </li>
+            <li>
+Initialize |disclosureData| to the object returned when calling the algorithm in
+[[[#CreateDisclosureData]]], passing the |document|, |proofData|,
+|selectivePointers|, and any custom JSON-LD API options, such as a document
+loader. The |disclosureData| object will contain the following fields: 
+|revealDocument|, |mandatoryIndexes|, |selectiveIndexes|, |verifierLabelMap|
+|mandatory|, and |nonMandatory|.
+            </li>
+            <li>
+Initialize |newProof| to a shallow copy of |proof|.
+            </li>
+            <li>
+Replace |proofValue| in |newProof| with the result of calling the approach 
+specific  <em>SerializeDerived</em> algorithm. For example, for the SIC approach
+use [[[#SerializeDerived-SIC]]] and for the SHoC approach use 
+[[[#SerializeDerived-SHoC]]]. In all cases passing
+|proofData|,and |disclosureData| as parameters.
+            </li>
+            <li>
+Set the value of the "proof" property in |revealDocument| to |newProof|.
+            </li>
+            <li>
+Return |revealDocument| as the <em>selectively revealed document</em>.
+            </li>
+          </ol>
+
+
         </section>
 
         <section>
@@ -3003,7 +3055,7 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
         <section id="HashSD">
           <h4>HashSD</h4>
         </section>
-        <section>
+        <section id="CreateDisclosureData">
           <h4>CreateDisclosureData</h4>
         </section>
         <section>
@@ -3016,10 +3068,10 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
         <section id="SerializeBase-SIC">
           <h4>SerializeBase-SIC</h4>
         </section>
-        <section>
+        <section id="ParseBase-SIC">
           <h4>ParseBase-SIC</h4>
         </section>
-        <section>
+        <section id="SerializeDerived-SIC">
           <h4>SerializeDerived-SIC</h4>
         </section>
         <section>
@@ -3038,10 +3090,10 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
         <section  id="SerializeBase-SHoC">
           <h4>SerializeBase-SHoC</h4>
         </section>
-        <section>
+        <section id="ParseBase-SHoC">
           <h4>ParseBase-SHoC</h4>
         </section>
-        <section>
+        <section id="SerializeDerived-SHoC">
           <h4>SerializeDerived-SHoC</h4>
         </section>
         <section>
