@@ -2923,6 +2923,57 @@ This general procedure can be decomposed into: (a) generic Proof Configuration,
 specific "Extended Proof Hashing", and (d) approach specific 
 "Base Proof Serialization".
           </p>
+          <p class="ednote">
+TODO: After precise defininitions of sub-algorithms, check all the parameter names,
+values, and return values for completeness and consistency.
+          </p>
+
+          <p>
+The following algorithm specifies how to create a [=data integrity proof=] given
+an <a>unsecured data document</a>. Required inputs are an
+<a>unsecured data document</a> ([=map=] |unsecuredDocument|), and a set of proof
+options ([=map=] |options|). A [=data integrity proof=] ([=map=]), or an error,
+is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Let |proof| be a clone of the proof options, |options|.
+            </li>
+            <li>
+Let |proofConfig| be the result of running the algorithm in
+Section [[[#ProofConfigurationAlg]]] with
+|options| passed as a parameter.
+            </li>
+            <li>
+Let |transformedData| be the result of running the algorithm in
+[[[#TransformSD]]] with |unsecuredDocument|,
+|proofConfig|, and |options| passed as parameters.
+            </li>
+            <li>
+Let |hashData| be the result of running the algorithm in
+[[[#HashSD]]] with |transformedData| and |proofConfig|
+passed as a parameters.
+            </li>
+            <li>
+In the case of a SHoC approach, add to |hashData| the |saltedHash| data that 
+results from running the algorithm in [[[#SaltedHashSD]]].
+            </li>
+            <li>
+Let |proofBytes| be the result of running the approach specific 
+<em>SerializeBase</em>algorithm. For example, for the SIC approach use 
+[[[#SerializeBase-SIC]]] and for the SHoC approach use 
+[[[#SerializeBase-SHoC]]]. In all cases pass |hashData| and
+|options| as parameters.
+            </li>
+            <li>
+Let |proof|.|proofValue| be a <a data-cite="CID#multibase-0">
+base64-url-encoded Multibase value</a> of the |proofBytes|.
+            </li>
+            <li>
+Return |proof| as the [=data integrity proof=].
+            </li>
+          </ol>
         </section>
 
         <section>
@@ -2946,10 +2997,10 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
 
       <section>
         <h3>Selective Disclosure Common Sub-Algorithms</h3>
-        <section>
+        <section  id="TransformSD">
           <h4>TransformSD</h4>
         </section>
-        <section>
+        <section id="HashSD">
           <h4>HashSD</h4>
         </section>
         <section>
@@ -2962,7 +3013,7 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
 
       <section>
         <h3>Signed Individual Claims (SIC) Specific Sub-Algorithms</h3>
-        <section>
+        <section id="SerializeBase-SIC">
           <h4>SerializeBase-SIC</h4>
         </section>
         <section>
@@ -2981,10 +3032,10 @@ This procedure can  be decomposed into: (a) approach specific "parse derived pro
 
       <section>
         <h3>Salted Hash of Claims (SHoC) Specific Sub-Algorithms</h3>
-        <section>
+        <section id="SaltedHashSD">
           <h4>SaltedHashSD</h4>
         </section>
-        <section>
+        <section  id="SerializeBase-SHoC">
           <h4>SerializeBase-SHoC</h4>
         </section>
         <section>
