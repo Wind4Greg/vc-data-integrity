@@ -3177,6 +3177,45 @@ and `hmacKey` set to |hmacKey|.
         </section>
         <section id="HashSD">
           <h4>HashSD</h4>
+          <p>
+The following algorithm specifies how to cryptographically hash a
+<em>transformed data document</em> and <em>proof configuration</em>
+into cryptographic hash data that is ready to be provided as input to the
+approach specific algorithms such as [[[#SerializeBase-SIC]]] and  
+[[[#SerializeBase-SHoC]]].
+          </p>
+
+          <p>
+The required inputs to this algorithm are a <em>transformed data document</em>
+(|transformedDocument|) and <em>canonical proof configuration</em>
+(|canonicalProofConfig|). A <em>hash data</em> value represented
+as an object is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |proofHash| to the result of calling the RDF Dataset Canonicalization
+algorithm [[RDF-CANON]] on |canonicalProofConfig| and then cryptographically
+hashing the result using the same hash that is used by the signature algorithm,
+i.e., SHA-256 for a P-256 curve. Note: This step can be performed in parallel;
+it only needs to be completed before this algorithm terminates as the result is
+part of the return value.
+            </li>
+            <li>
+Initialize |mandatoryHash| to the result of calling the the algorithm in Section
+[[[#hashmandatorynquads]]], passing
+|transformedDocument|.|mandatory|.
+            </li>
+            <li>
+Initialize |hashData| as a deep copy of |transformedDocument| and
+add |proofHash| as `proofHash` and |mandatoryHash| as `mandatoryHash` to that
+object.
+            </li>
+            <li>
+Return |hashData| as <em>hash data</em>.
+            </li>
+          </ol>
+
         </section>
         <section id="CreateDisclosureData">
           <h4>CreateDisclosureData</h4>
