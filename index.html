@@ -3219,6 +3219,132 @@ Return |hashData| as <em>hash data</em>.
         </section>
         <section id="CreateDisclosureData">
           <h4>CreateDisclosureData</h4>
+          <p class="ednote">
+WORK IN  PROGRESS
+          </p>
+
+          <p>
+The following algorithm creates data to be used to generate a derived proof. The
+inputs include a JSON-LD document (|document|), parsed base proof data
+(|proofData|), an array of JSON pointers to use to selectively disclose
+statements (|selectivePointers|), and any custom JSON-LD API options,
+such as a document loader). A single object, <em>disclosure data</em>, is
+produced as output, which contains the "revealDocument", "mandatoryIndexes",
+"selectiveIndexes", "verifierLabelMap", "mandatory", and
+"nonMandatory" fields.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |hmac| to an HMAC API using |proofData|.|hmacKey|. The HMAC uses the same hash
+algorithm used in the signature algorithm, i.e., SHA-256 for a P-256 curve.
+            </li>
+            <li>
+If |cryptosuite| is set to `ecdsa-sd-2023` then
+initialize |labelMapFactoryFunction| to the result of calling the algorithm of
+Section [[[#createhmacidlabelmapfunction]]], passing |hmac|; otherwise 
+initialize |labelMapFactoryFunction| to the result of calling the algorithm of
+Section [[[#createshuffledidlabelmapfunction]]], passing |hmac|.
+            </li>
+            <li>
+Initialize |combinedPointers| to the concatenation of |mandatoryPointers|
+and |selectivePointers|.
+            </li>
+            <li>
+Initialize |groupDefinitions| to a map with the following entries: key of
+the string `"mandatory"` and value of |proofData|.|mandatoryPointers|, key of 
+the string `"selective"` and value of |selectivePointers|, and key of the string
+ `"combined"` and value of |combinedPointers|.
+            </li>
+            <li>
+Initialize |groups| and |labelMap| to their associated values in the result
+of calling the algorithm in Section
+[[[#canonicalizeandgroup]]], passing |document|,
+|labelMapFactoryFunction|, |groupDefinitions|, and any custom
+JSON-LD API options as parameters. Note: This step transforms the document into
+an array of canonical N-Quad strings with pseudorandom blank node identifiers
+based on |hmac|, and groups the N-Quad strings according to selections based on
+JSON pointers.
+            </li>
+<li>
+Compute the mandatory indexes. Initialize |relativeIndex| to zero.
+            </li>
+            <li>
+Initialize |mandatoryIndexes| to an empty array.
+            </li>
+            <li>
+For each |absoluteIndex| in the keys in |groups|.|combined|.|matching|, convert
+the absolute index of any <em>mandatory</em> N-Quad to an index relative to the
+combined output that is to be revealed:
+              <ol class="algorithm">
+                <li>
+If |groups|.|mandatory|.|matching| has |absoluteIndex| as a key, then append
+|relativeIndex| to |mandatoryIndexes|.
+                </li>
+                <li>
+Increment |relativeIndex|.
+                </li>
+              </ol>
+            </li>
+            <li>
+Compute the selective indexes. Initialize |relativeIndex| to zero.
+            </li>
+            <li>
+Initialize |selectiveIndexes| to an empty array.
+            </li>
+            <li>
+For each |absoluteIndex| in the keys in |groups|.|combined|.|matching|, convert
+the absolute index of any <em>selective</em> N-Quad to an index relative to the
+combined output that is to be revealed:
+              <ol class="algorithm">
+                <li>
+If |groups|.|selective|.|matching| has |absoluteIndex| as a key, then append
+|relativeIndex| to |selectiveIndexes|.
+                </li>
+                <li>
+Increment |relativeIndex|.
+                </li>
+              </ol>
+            </li>
+            <li>
+Initialize |revealDocument| to the result of the calling the algorithm in Section
+[[[#selectjsonld]]], passing |document|, and |combinedPointers| as |pointers|.
+            </li>
+            <li>
+Run the RDF Dataset Canonicalization Algorithm [[RDF-CANON]] on
+the joined |combinedGroup.deskolemizedNQuads|, passing any custom
+options, and get the canonical bnode identifier map, |canonicalIdMap|.
+Note: This map includes the canonical blank node identifiers that a verifier
+will produce when they canonicalize the reveal document.
+            </li>
+            <li>
+Initialize |verifierLabelMap| to an empty map. This map will map
+the canonical blank node identifiers the verifier will produce when they
+canonicalize the revealed document to the blank node identifiers that were
+originally signed in the base proof.
+            </li>
+            <li>
+For each key (|inputLabel|) and value (|verifierLabel|) in |canonicalIdMap|:
+              <ol class="algorithm">
+                <li>
+Add an entry to |verifierLabelMap| using |verifierLabel| as the key and the
+value associated with |inputLabel| as a key in |labelMap| as the value.
+                </li>
+              </ol>
+            </li>
+<!--A single object, <em>disclosure data</em>, is
+produced as output, which contains the "revealDocument", "mandatoryIndexes",
+"selectiveIndexes", "verifierLabelMap", "mandatory", and
+"nonMandatory" fields.-->
+            <li>
+Return an object with properties matching |revealDocument|, |mandatoryIndexes|,
+|selectiveIndexes|, |verifierLabelMap|, 
+|groups|.|mandatory|.|matching| for |mandatory|, and 
+|groups|.|mandatory|.|nonMatching| for |nonMandatory|.
+            </li>
+          </ol>
+
+
         </section>
         <section id="CreateVerifyData">
           <h4>CreateVerifyData</h4>
