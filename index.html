@@ -3105,6 +3105,75 @@ data-cite="INFRA#nulls">Null</a>
         <h3>Selective Disclosure Common Sub-Algorithms</h3>
         <section  id="TransformSD">
           <h4>TransformSD</h4>
+
+          <p>
+The following algorithm specifies how to transform an unsecured input document
+into a transformed document that is ready to be provided as input to the
+hashing algorithm in Section [[[#HashSD]]] and depending on approach may be
+input to the salted hashing algorithm [[[#SaltedHashSD]]].
+          </p>
+
+          <p>
+Required inputs to this algorithm are an
+<a data-cite="vc-data-integrity#dfn-unsecured-data-document">
+unsecured data document</a> (|unsecuredDocument|) and
+transformation options (|options|). The
+transformation options MUST contain a type identifier for the
+<a data-cite="vc-data-integrity#dfn-cryptosuite">
+cryptographic suite</a> (|type|), a cryptosuite
+identifier (|cryptosuite|), and a verification method
+(|verificationMethod|). The transformation options MUST contain an
+array of mandatory JSON pointers (|mandatoryPointers|) and MAY contain
+additional options, such as a JSON-LD document loader. A <em>transformed data
+document</em> is produced as output. Whenever this algorithm encodes strings, it
+MUST use UTF-8 encoding.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |hmac| to an HMAC API using a locally generated and exportable HMAC
+key. The HMAC uses the same hash algorithm used in the signature algorithm,
+which is detected via the |verificationMethod| provided to the
+function, i.e., SHA-256 for a P-256 curve. Per the recommendations of
+[[RFC2104]], the HMAC key MUST be the same length as the digest size; for SHA-256,
+this is 256 bits or 32 bytes.
+            </li>
+            <li>
+If |cryptosuite| is set to `ecdsa-sd-2023` then
+initialize |labelMapFactoryFunction| to the result of calling the algorithm of
+Section [[[#createhmacidlabelmapfunction]]], passing |hmac|; otherwise 
+initialize |labelMapFactoryFunction| to the result of calling the algorithm of
+Section [[[#createshuffledidlabelmapfunction]]], passing |hmac|;
+            </li>
+            <li>
+Initialize |groupDefinitions| to a map with an entry with a key of the string
+"mandatory" and a value of |mandatoryPointers|.
+            </li>
+            <li>
+Initialize |groups| to the result of calling the algorithm in Section
+[[[#canonicalizeandgroup]]], passing |labelMapFactoryFunction|,
+|groupDefinitions|, |unsecuredDocument| as |document|, and any custom JSON-LD
+API options. Note: This step transforms the document into an array of canonical
+N-Quads with pseudorandom blank node identifiers based on |hmac|, and groups
+the N-Quad strings according to selections based on JSON pointers.
+            </li>
+            <li>
+Initialize |mandatory| to the values in the |groups|.|mandatory|.|matching| map.
+            </li>
+            <li>
+Initialize |nonMandatory| to the values in the
+|groups|.|mandatory|.|nonMatching| map.
+            </li>
+            <li>
+Initialize |hmacKey| to the result of exporting the HMAC key from |hmac|.
+            </li>
+            <li>
+Return an object with `mandatoryPointers` set to |mandatoryPointers|,
+`mandatory` set to |mandatory|, `nonMandatory` set to |nonMandatory|,
+and `hmacKey` set to |hmacKey|.
+            </li>
+          </ol>
+
         </section>
         <section id="HashSD">
           <h4>HashSD</h4>
