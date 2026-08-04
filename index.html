@@ -3524,10 +3524,6 @@ respectively.
         <section id="SerializeDerived-SIC">
           <h4>SerializeDerived-SIC</h4>
 
-          <p class="ednote">
-WORK IN PROGRESS.
-          </p>
-
           <p>
 The following algorithm serializes a derived proof value. The required input is
 a |dislosureData| object containing the following fields:
@@ -3572,9 +3568,59 @@ starting with "`u`" and ending with the base64url-no-pad-encoded value of
         </section>
         <section id="ParseDerived-SIC">
           <h4>ParseDerived-SIC</h4>
+
+          <p>
+The following algorithm parses the components of the derived proof value.
+The required input is a derived proof value (|proofValue|).
+A single <em>derived proof value</em> value object is produced as output, which
+contains a set to five elements, using the names "baseSignature", "publicKey",
+"signatures", "labelMap", and "mandatoryIndexes".
+          </p>
+
+          <ol class="algorithm">
+            <li>
+If the |proofValue| string does not start with `u`, indicating that it is a
+multibase-base64url-no-pad-encoded value, an error MUST be raised
+and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
+            </li>
+            <li>
+Initialize |decodedProofValue| to the result of base64url-no-pad-decoding the
+substring after the leading `u` in |proofValue|.
+            </li>
+            <li>
+If the |decodedProofValue| does not start with the ECDSA-SD disclosure proof
+header bytes `0xd9`, `0x5d`, and `0x01`, or the general SIC approach derived 
+proof header bytes TBD, an error MUST be raised
+and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
+            </li>
+            <li>
+Initialize |components| to an array that is the result of CBOR-decoding the bytes
+that follow the three-byte derived proof header. If the result is not
+an array of five elements an error MUST be raised
+and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
+            </li>
+            <li>
+Replace the fourth element in |components| using the result of calling the
+algorithm in Section [[[#decompresslabelmap]]], passing the existing
+fourth element of |components| as |compressedLabelMap| and |cryptosuite|.
+            </li>
+            <li>
+Return <em>derived proof value</em> as an object with properties set to the five
+elements, using the names "baseSignature", "publicKey", "signatures",
+"labelMap", and "mandatoryIndexes", respectively.
+            </li>
+          </ol>
+
         </section>
+
         <section id="VerifyDerived-SIC">
           <h4>VerifyDerived-SIC</h4>
+          <p class="ednote">
+WORK IN PROGRESS.
+          </p>
         </section>
       </section>
 
@@ -3884,6 +3930,38 @@ integer parsed from the characters following the "b" prefix in `v`.
             </li>
             <li>
 Return |map| as <em>compressed label map</em>.
+            </li>
+          </ol>
+
+        </section>
+
+        <section>
+          <h4>decompressLabelMap</h4>
+
+          <p>
+The following algorithm decompresses a label map. The required inputs are a
+compressed label map (|compressedLabelMap|) and the |cryptosuite|. The output 
+is a <em>decompressed label map</em>.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |map| to an empty map.
+            </li>
+            <li>
+For each entry (|k|, |v|) in |compressedLabelMap|:
+              <ol class="algorithm">
+                <li>
+If |cryptosuite| is set to `ecdsa-sd-2023` then
+add an entry to |map| with a key that adds the prefix "c14n" to |k| and a value
+that adds a prefix of "u" to the base64url-no-pad-encoded value for |v|;  
+Otherwise add an entry to `map`, with a key that adds the prefix "c14n" to `k`, and a value
+that adds a prefix of "b" to `v`.
+                </li>
+              </ol>
+            </li>
+            <li>
+Return |map| as <em>decompressed label map</em>.
             </li>
           </ol>
 
