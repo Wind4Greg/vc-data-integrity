@@ -3443,11 +3443,11 @@ signature over its public key using the private key associated with the base
 proof verification method.
             </li>
             <li>
-Initialize |publicKey| to the multikey expression of the public key exported
+Initialize |publicKeyProofScoped| to the multikey expression of the public key exported
 from |proofScopedKeyPair|.
             </li>
             <li>
-Initialize |toSign| to the concatenation of |proofHash|, |publicKey|, and
+Initialize |toSign| to the concatenation of |proofHash|, |publicKeyProofScoped|, and
 |mandatoryHash|, in that order.
             </li>
             <li>
@@ -3463,7 +3463,7 @@ ECDSA-SD base proof header bytes 0xd9, 0x5d, and 0x00. Otherwise initialize
             </li>
             <li>
 Initialize |components| to an array with five elements containing the values of:
-|baseSignature|, |publicKey|, |hmacKey|, |signatures|, and |mandatoryPointers|.
+|baseSignature|, |publicKeyProofScoped|, |hmacKey|, |signatures|, and |mandatoryPointers|.
             </li>
             <li>
 CBOR-encode |components| per [[RFC8949]] where CBOR tagging MUST NOT be used on
@@ -3483,7 +3483,7 @@ The following algorithm parses the components of a legacy `ecdsa-sd-2023` select
 disclosure base proof value or a general signed individual claim (SIC) approach
 selective disclosure base proof. The required inputs are a proof value
 (|proofValue|). A single object <em>parsed base proof</em>, containing
-five elements, using the names `baseSignature`, `publicKey`, `hmacKey`,
+five elements, using the names `baseSignature`, `publicKeyProofScoped`, `hmacKey`,
 `signatures`, and `mandatoryPointers`, is produced  as output.
           </p>
 
@@ -3513,7 +3513,7 @@ is an array of five elements.
             </li>
             <li>
 Return an object with properties set to the five elements, using the names
-`baseSignature`, `publicKey`, `hmacKey`, `signatures`, and `mandatoryPointers`,
+`baseSignature`, `publicKeyProofScoped`, `hmacKey`, `signatures`, and `mandatoryPointers`,
 respectively.
             </li>
           </ol>
@@ -3548,7 +3548,7 @@ TBD.
             </li>
             <li>
 Initialize |components| to an array with five elements containing the values of:
-|baseSignature|, |publicKey|, |signatures|, |compressedLabelMap|, and
+|baseSignature|, |publicKeyProofScoped|, |signatures|, |compressedLabelMap|, and
 |mandatoryIndexes|.
             </li>
             <li>
@@ -3573,7 +3573,7 @@ starting with "`u`" and ending with the base64url-no-pad-encoded value of
 The following algorithm parses the components of the derived proof value.
 The required input is a derived proof value (|proofValue|).
 A single <em>derived proof value</em> value object is produced as output, which
-contains a set to five elements, using the names "baseSignature", "publicKey",
+contains a set to five elements, using the names "baseSignature", "publicKeyProofScoped",
 "signatures", "labelMap", and "mandatoryIndexes".
           </p>
 
@@ -3618,9 +3618,86 @@ elements, using the names "baseSignature", "publicKey", "signatures",
 
         <section id="VerifyDerived-SIC">
           <h4>VerifyDerived-SIC</h4>
-          <p class="ednote">
-WORK IN PROGRESS.
+
+          <p>
+The following algorithm attempts verification of an `ecdsa-sd-2023` derived
+proof or a general SIC approach derived proof. This algorithm is called by a 
+verifier of an ECDSA-SD-protected or SIC approach protected
+[=verifiable credential=]. The inputs include a JSON-LD document
+(|document|), derived proof data (|proofData|), verification data 
+(|verifyData|), and any custom JSON-LD API options, such as a document loader. 
+This algorithm returns a [=verification result=]:
           </p>
+
+          <ol class="algorithm">
+            <li>
+Let |unsecuredDocument| be a copy of |document| with the `proof` value removed.
+            </li>
+            <li>
+Let |publicKeyBytes| be the result of retrieving the
+public key bytes associated with the
+|options|.|verificationMethod| value as described in the
+[[[CID]]] specification,
+<a data-cite="CID#retrieve-verification-method">
+Section: Retrieve Verification Method</a>.
+            </li>
+            <li>
+Initialize |baseSignature|,  |publicKeyProofScoped|, and |signatures| to the values 
+associated with their property names in the |proofData| object and
+|proofHash|, |mandatoryHash|, and |nonMandatory| to the values associated with 
+their property names in the |verifyData| object.
+            </li>
+            <li>
+If the length of |signatures| does not match the length of |nonMandatory|,
+an error MUST be raised and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>,
+indicating that the signature count does not match
+the non-mandatory message count.
+            </li>
+            <li>
+Initialize |toVerify| to the concatenation of |proofHash|, |publicKeyProofScoped|, and 
+|mandatoryHash|, in that order.
+            </li>
+            <li>
+Initialize |verified| to true.
+            </li>
+            <li>
+Initialize |verificationCheck| be the result of applying the verification
+algorithm of the signature algorithm appropriate to the |cryptosuite|,
+with |toVerify| as the data to be verified against the |baseSignature| using
+the public key specified by |publicKeyBytes|. If |verificationCheck| is
+`false`, set |verified| to false.
+            </li>
+            <li>
+For every entry (|index|, |signature|) in |signatures|, verify every signature
+for every selectively disclosed (non-mandatory) statement:
+              <ol class="algorithm">
+                <li>
+Initialize |verificationCheck| to the result of applying the verification
+algorithm for the signature algorithm of the  |cryptosuite|, with
+the UTF-8 representation of the value at |index| of |nonMandatory| as the data
+to be verified against |signature| using the public key specified by
+|publicKeyProofScoped|.
+                </li>
+                <li>
+If |verificationCheck| is `false`, set |verified| to false.
+                </li>
+              </ol>
+            </li>
+            <li>
+Return a [=verification result=] with [=struct/items=]:
+              <dl data-link-for="verification result">
+                <dt>[=verified=]</dt>
+                <dd>The value of |verified|</dd>
+                <dt>[=verifiedDocument=]</dt>
+                <dd>
+|unsecuredDocument| if |verified| is `true`, otherwise <a
+data-cite="INFRA#nulls">Null</a>
+                </dd>
+              </dl>
+            </li>
+          </ol>
+
         </section>
       </section>
 
@@ -3628,6 +3705,10 @@ WORK IN PROGRESS.
         <h3>Salted Hash of Claims (SHoC) Specific Sub-Algorithms</h3>
         <section id="SaltedHashSD">
           <h4>SaltedHashSD</h4>
+          <p class="ednote">
+WORK IN PROGRESS.
+          </p>
+
         </section>
         <section  id="SerializeBase-SHoC">
           <h4>SerializeBase-SHoC</h4>
