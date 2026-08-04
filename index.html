@@ -3405,9 +3405,6 @@ Return an object with properties matching |proofHash|, |nonMandatory|, and
         <h3>Signed Individual Claims (SIC) Specific Sub-Algorithms</h3>
         <section id="SerializeBase-SIC">
           <h4>SerializeBase-SIC</h4>
-          <p class="ednote">
-WORK IN PROGRESS.
-          </p>
 
           <p>
 The following algorithm specifies how to create a serialized base proof 
@@ -3477,13 +3474,60 @@ Return |proofBytes|.
             </li>
           </ol>
 
-
         </section>
+
         <section id="ParseBase-SIC">
           <h4>ParseBase-SIC</h4>
+          <p>
+The following algorithm parses the components of a legacy `ecdsa-sd-2023` selective
+disclosure base proof value or a general signed individual claim (SIC) approach
+selective disclosure base proof. The required inputs are a proof value
+(|proofValue|). A single object <em>parsed base proof</em>, containing
+five elements, using the names `baseSignature`, `publicKey`, `hmacKey`,
+`signatures`, and `mandatoryPointers`, is produced  as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+If the |proofValue| string does not start with `u`, indicating that it is
+a multibase-base64url-no-pad-encoded value, an error MUST be raised
+and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
+            </li>
+            <li>
+Initialize |decodedProofValue| to the result of base64url-no-pad-decoding the
+substring after the leading `u` in |proofValue|.
+            </li>
+            <li>
+
+If the |decodedProofValue| does not start with the ECDSA-SD base proof
+header bytes `0xd9`, `0x5d`, and `0x00`, or the general SIC header bytes TBD,
+an error MUST be raised and SHOULD
+convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
+            </li>
+            <li>
+Initialize |components| to an array that is the result of CBOR-decoding the
+bytes that follow the three-byte base proof header. Confirm that the result
+is an array of five elements.
+            </li>
+            <li>
+Return an object with properties set to the five elements, using the names
+`baseSignature`, `publicKey`, `hmacKey`, `signatures`, and `mandatoryPointers`,
+respectively.
+            </li>
+          </ol>
+
+
         </section>
+
         <section id="SerializeDerived-SIC">
           <h4>SerializeDerived-SIC</h4>
+          
+          <p class="ednote">
+WORK IN PROGRESS.
+          </p>
+
         </section>
         <section id="ParseDerived-SIC">
           <h4>ParseDerived-SIC</h4>
