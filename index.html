@@ -3523,10 +3523,51 @@ respectively.
 
         <section id="SerializeDerived-SIC">
           <h4>SerializeDerived-SIC</h4>
-          
+
           <p class="ednote">
 WORK IN PROGRESS.
           </p>
+
+          <p>
+The following algorithm serializes a derived proof value. The required input is
+a |dislosureData| object containing the following fields:
+base signature (|baseSignature|), public key
+(|publicKey|), an array of signatures (|signatures|), a label
+map (|labelMap|), and an array of mandatory indexes
+(|mandatoryIndexes|). A single <em>derived proof</em> value, serialized
+as a byte string, is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |compressedLabelMap| to the result of calling the algorithm in
+Section [[[#compresslabelmap]]], passing |labelMap| as the parameter.
+            </li>
+            <li>
+If |cryptosuite| is set to `ecdsa-sd-2023` then
+initialize a byte array, |proofValue|, that starts with the ECDSA-SD disclosure
+proof header bytes `0xd9`, `0x5d`, and `0x01`. Otherwise initialize a byte 
+array, |proofValue|, that starts with the general SIC derived proof header bytes
+TBD.
+            </li>
+            <li>
+Initialize |components| to an array with five elements containing the values of:
+|baseSignature|, |publicKey|, |signatures|, |compressedLabelMap|, and
+|mandatoryIndexes|.
+            </li>
+            <li>
+CBOR-encode |components| per [[RFC8949]] where CBOR tagging MUST NOT be used on
+any of the |components|. Append the produced encoded value to |proofValue|.
+            </li>
+            <li>
+Return the <em>derived proof</em> as a string with the
+base64url-no-pad-encoding of |proofValue| as described in the
+<a data-cite="CID#multibase-0">
+Multibase section</a> of [[[CID]]]. That is, return a string
+starting with "`u`" and ending with the base64url-no-pad-encoded value of
+|proofValue|.
+            </li>
+          </ol>
 
         </section>
         <section id="ParseDerived-SIC">
@@ -3810,6 +3851,41 @@ in the produced label map using a prefix and integers based on their sorted
 order. This primitive might be useful for selective disclosure schemes,
 such as BBS, that favor unlinkability over minimizing unrevealed data leakage.
           </p>
+
+        </section>
+
+        <section>
+          <h4>compressLabelMap</h4>
+
+          <p>
+The following algorithm compresses a label map. The required inputs are
+label map (|labelMap|) and the |cryptosuite|. The output is a 
+<em>compressed label map</em>.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |map| to an empty map.
+            </li>
+            <li>
+For each entry (|k|, |v|) in |labelMap|:
+              <ol class="algorithm">
+                <li>
+if |cryptosuite| is  set to  `ecdsa-sd-2023` then
+add an entry to |map| with a key that is a base-10 integer parsed from the
+characters following the "c14n" prefix in |k| and a value that is a byte array
+resulting from base64url-no-pad-decoding the characters after the "u" prefix in
+|v|. Otherwise add an entry to `map`, with a key that is a base-10 integer 
+parsed from the
+characters following the "c14n" prefix in |k|, and a value that is a base-10
+integer parsed from the characters following the "b" prefix in `v`.
+                </li>
+              </ol>
+            </li>
+            <li>
+Return |map| as <em>compressed label map</em>.
+            </li>
+          </ol>
 
         </section>
 
