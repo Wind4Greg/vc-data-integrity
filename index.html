@@ -3705,9 +3705,6 @@ data-cite="INFRA#nulls">Null</a>
         <h3>Salted Hash of Claims (SHoC) Specific Sub-Algorithms</h3>
         <section id="SaltedHashSD">
           <h4>SaltedHashSD</h4>
-          <p class="ednote">
-WORK IN PROGRESS.
-          </p>
 
           <p>
 The following algorithm specifies how to create salted hash data.
@@ -3750,9 +3747,77 @@ NIST SP-800-90A,B,C documents and/or BSI AIS 20 and AIS 31 documents.
         </section>
         <section  id="SerializeBase-SHoC">
           <h4>SerializeBase-SHoC</h4>
+
+          <p>
+The following algorithm specifies how to serialize SHoC approach base proof; 
+called by an
+issuer of an Quantum-Safe-SD-protected Verifiable Credential.
+The base proof is to be
+given only to the holder, who is responsible for generating a derived proof from
+it, exposing only selectively disclosed details in the proof to a verifier. This
+algorithm is designed to be used in conjunction with the algorithms defined
+in the Data Integrity [[VC-DATA-INTEGRITY]] specification,
+<a data-cite="vc-data-integrity#algorithms">
+Section 4: Algorithms</a>. Required inputs are
+cryptographic hash data (|hashData|) and
+<em>proof options</em> (|options|). The
+<em>proof options</em> MUST contain a type identifier for the
+<a data-cite="vc-data-integrity#dfn-cryptosuite">
+cryptographic suite</a> (|type|) and MAY contain a cryptosuite
+identifier (|cryptosuite|). A single <em>digital proof</em> value
+represented as series of bytes is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |proofHash|, |mandatoryPointers|, |mandatoryHash|, |salts|,
+|saltedHashes|,
+and |hmacKey| to the values associated with their property names
+|hashData|.
+            </li>
+            <li>
+Initialize |toSign| the hash of the concatenation of |proofHash|,
+|mandatoryHash|, |salts|,
+and |saltedHashes| where the order of the concatenation MUST be followed. The
+cryptographic hash algorithm is that specified for signature algorithm in
+[[[#HashSigTable]]], e.g., SHA-256 for a security category 1 or 2 algorithms.
+            </li>
+            <li>
+Initialize |signature| to the result of digitally signing |toSign| using the
+private key associated with the base proof verification method.
+            </li>
+            <li>
+Initialize a byte array, |proofValue|, that starts with the SHoC approach
+base proof header bytes 0xd9, 0x5d, and 0x10.
+            </li>
+            <li>
+Initialize |components| to an array with five elements containing the values of:
+|signature|, |hmacKey|, |salts|, |saltedHashes|, and |mandatoryPointers|.
+            </li>
+            <li>
+CBOR-encode |components| per [[RFC8949]] where CBOR tagging MUST NOT be used on
+any of the |components|. Append the produced encoded value to |proofValue|.
+            </li>
+
+            <li>
+Return |proofValue| as <em>proof bytes</em>.
+            </li>
+          </ol>
+
+          <p class="ednote">
+The SHoC approach base proof header bytes 0xd9, 0x5d, and 0x10 were chosen
+to not collide with any of the [[VC-DI-ECDSA]] or [[VC-DI-BBS]] values. They are
+currently tentative.
+          </p>
+
         </section>
         <section id="ParseBase-SHoC">
           <h4>ParseBase-SHoC</h4>
+
+          <p class="ednote">
+WORK IN PROGRESS.
+          </p>
+
         </section>
         <section id="SerializeDerived-SHoC">
           <h4>SerializeDerived-SHoC</h4>
