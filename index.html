@@ -3405,6 +3405,79 @@ Return an object with properties matching |proofHash|, |nonMandatory|, and
         <h3>Signed Individual Claims (SIC) Specific Sub-Algorithms</h3>
         <section id="SerializeBase-SIC">
           <h4>SerializeBase-SIC</h4>
+          <p class="ednote">
+WORK IN PROGRESS.
+          </p>
+
+          <p>
+The following algorithm specifies how to create a serialized base proof 
+in the signed individual claims (SIC) approach. 
+Required inputs are
+cryptographic hash data (|hashData|) and
+<em>proof options</em> (|options|). The
+<em>proof options</em> MUST contain a type identifier for the
+<a data-cite="vc-data-integrity#dfn-cryptosuite">
+cryptographic suite</a> (|type|) and MAY contain a cryptosuite
+identifier (|cryptosuite|). A single <em>digital proof</em> value
+represented as series of bytes is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |proofHash|, |mandatoryPointers|, |mandatoryHash|, |nonMandatory|,
+and |hmacKey| to the values associated with their property names in
+|hashData|.
+            </li>
+            <li>
+Initialize |proofScopedKeyPair| to a locally generated key pair corresponding to
+the signature algorithm use by the |crytosuite|.
+Note: This key pair is scoped to the specific proof; it is not used for anything
+else and the private key will be destroyed when this algorithm terminates.
+            </li>
+            <li>
+Initialize |signatures| to an array where each element holds the result of
+digitally signing the UTF-8 representation of each N-Quad string in
+|nonMandatory|, in order. The digital signature algorithm is the same as that 
+for the |cryptosuite| and uses the private key from
+|proofScopedKeyPair|. Note: This step generates individual signatures for each
+statement (claim) that can be selectively disclosed using a local, proof-scoped 
+key pair that binds them together; this key pair will be bound to the proof by a
+signature over its public key using the private key associated with the base
+proof verification method.
+            </li>
+            <li>
+Initialize |publicKey| to the multikey expression of the public key exported
+from |proofScopedKeyPair|.
+            </li>
+            <li>
+Initialize |toSign| to the concatenation of |proofHash|, |publicKey|, and
+|mandatoryHash|, in that order.
+            </li>
+            <li>
+Initialize |baseSignature| to the result of digitally signing |toSign| using the
+private key associated with the base proof verification method.
+            </li>
+
+            <li>
+If |cryptosuite| is set to `ecdsa-sd-2023` then
+initialize a byte array, |proofBytes|, so that starts with the legacay 
+ECDSA-SD base proof header bytes 0xd9, 0x5d, and 0x00. Otherwise initialize
+|proofValue| with the general SIC header bytes TBD. 
+            </li>
+            <li>
+Initialize |components| to an array with five elements containing the values of:
+|baseSignature|, |publicKey|, |hmacKey|, |signatures|, and |mandatoryPointers|.
+            </li>
+            <li>
+CBOR-encode |components| per [[RFC8949]] where CBOR tagging MUST NOT be used on
+any of the |components|. Append the produced encoded value to |proofBytes|.
+            </li>
+            <li>
+Return |proofBytes|.
+            </li>
+          </ol>
+
+
         </section>
         <section id="ParseBase-SIC">
           <h4>ParseBase-SIC</h4>
