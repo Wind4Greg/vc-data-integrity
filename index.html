@@ -3709,6 +3709,44 @@ data-cite="INFRA#nulls">Null</a>
 WORK IN PROGRESS.
           </p>
 
+          <p>
+The following algorithm specifies how to create salted hash data.
+          </p>
+
+          <p>
+The required inputs to this algorithm are a <em>transformed data document</em>
+(|transformedDocument|) and |cryptosuite|. A <em>salted hash data</em> value 
+represented as an object is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |salts| as an empty array. For each |nonMandatory| item in the
+|transformedDocument| create a cryptographically secure random number of
+byte length half the size of the hash length, e.g., for security category 1 or 2
+using SHA-256 the length of each salt would be 16 bytes.
+            </li>
+            <li>
+Initialize |saltedHashes| as an empty array. For each |nonMandatory| item in the
+|transformedDocument| compute the appropriate hash (SHA-256 for security
+category 1 or 2 signature algorithms) over the concatenation of each |salt| and
+its corresponding |nonMandatory| item. Add this hash value to the |saltedHashes|
+array.
+            </li>
+            <li>
+Add |salts| as `salts` and |saltedHashes| as  `saltedHashes` to  the |saltedHashData|
+object.
+            </li>
+            <li>
+Return |saltedHashData|.
+            </li>
+          </ol>
+          <p class="ednote">
+To do: provide background on <em>cryptographic random number generation</em> in the
+security considerations section. For example cite appropriate references such as
+NIST SP-800-90A,B,C documents and/or BSI AIS 20 and AIS 31 documents.
+          </p>
+
         </section>
         <section  id="SerializeBase-SHoC">
           <h4>SerializeBase-SHoC</h4>
