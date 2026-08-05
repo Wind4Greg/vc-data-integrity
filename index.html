@@ -3780,7 +3780,7 @@ Initialize |toSign| the hash of the concatenation of |proofHash|,
 |mandatoryHash|, |salts|,
 and |saltedHashes| where the order of the concatenation MUST be followed. The
 cryptographic hash algorithm is that specified for signature algorithm in
-[[[#HashSigTable]]], e.g., SHA-256 for a security category 1 or 2 algorithms.
+the |cryptosuite|.
             </li>
             <li>
 Initialize |signature| to the result of digitally signing |toSign| using the
@@ -3814,13 +3814,50 @@ currently tentative.
         <section id="ParseBase-SHoC">
           <h4>ParseBase-SHoC</h4>
 
+          <p>
+The following algorithm parses the components of a SHoC approach selective
+disclosure base proof value. The required inputs are a proof value
+(|proofValue|). A single object <em>proof data</em>, containing
+five elements, using the names `signature`, `hmacKey`, `salts`
+`saltedHashes`, and `mandatoryPointers`, is produced  as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+If the |proofValue| string does not start with `u`, indicating that it is
+a multibase-base64url-no-pad-encoded value, an error MUST be raised
+and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
+            </li>
+            <li>
+Initialize |decodedProofValue| to the result of base64url-no-pad-decoding the
+substring after the leading `u` in |proofValue|.
+            </li>
+            <li>
+If the |decodedProofValue| does not start with the SHoC approach base proof
+header bytes `0xd9`, `0x5d`, and `0x10`, an error MUST be raised and SHOULD
+convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>.
+            </li>
+            <li>
+Initialize |components| to an array that is the result of CBOR-decoding the
+bytes that follow the three-byte SHoC approach base proof header. Confirm that
+the result is an array of five elements.
+            </li>
+            <li>
+Return an object with properties set to the five elements, using the names
+`signature`, `hmacKey`, `salts`, `saltedHashes`, and `mandatoryPointers`,
+respectively.
+            </li>
+          </ol>
+        </section>
+
+        <section id="SerializeDerived-SHoC">
+          <h4>SerializeDerived-SHoC</h4>
+
           <p class="ednote">
 WORK IN PROGRESS.
           </p>
-
-        </section>
-        <section id="SerializeDerived-SHoC">
-          <h4>SerializeDerived-SHoC</h4>
         </section>
         <section id="ParseDerived-SHoC">
           <h4>ParseDerived-SHoC</h4>
