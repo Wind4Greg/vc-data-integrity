@@ -3855,19 +3855,62 @@ respectively.
         <section id="SerializeDerived-SHoC">
           <h4>SerializeDerived-SHoC</h4>
 
+          <p>
+The following algorithm serializes a SHoC approach derived proof value.
+The required inputs are a base signature (|signature|), an array of salts
+(|salts|), an array of salted  hashes (|saltedHashes|), a label map
+(|labelMap|), an array of mandatory indexes (|mandatoryIndexes|), and an array
+of selective indexes (|selectiveIndexes|). A single <em>derived proof</em>
+value, serialized as a UTF-8 string, is produced as output.
+          </p>
+
+          <ol class="algorithm">
+            <li>
+Initialize |compressedLabelMap| to the result of calling the algorithm in
+[[[#compresslabelmap]]], passing |labelMap| as the parameter.
+            </li>
+            <li>
+Initialize a byte array, |proofValue|, that starts with the SHoC approach
+derived proof header bytes `0xd9`, `0x5d`, and `0x11`.
+            </li>
+            <li>
+Initialize |components| to an array with six elements containing the values of:
+|signature|, |salts|, |saltedHashes|, |compressedLabelMap|, |mandatoryIndexes|,
+|selectiveIndexes|.
+            </li>
+            <li>
+CBOR-encode |components| per [[RFC8949]] where CBOR tagging MUST NOT be used on
+any of the |components|. Append the produced encoded value to |proofValue|.
+            </li>
+            <li>
+Return the <em>derived proof</em> as a string with the
+base64url-no-pad-encoding of |proofValue| as described in the
+<a data-cite="CID#multibase-0">
+Multibase section</a> of [[[CID]]]. That is, return a string
+starting with "`u`" and ending with the base64url-no-pad-encoded value of
+|proofValue|.
+            </li>
+          </ol>
+          <p class="ednote">
+The SHoC approach derived proof header bytes `0xd9`, `0x5d`, and `0x11`
+were chosen to not conflict with values used by [[VC-DI-ECDSA]] and
+[[VC-DI-BBS]] and are tentative.
+          </p>
+        </section>
+
+        <section id="ParseDerived-SHoC">
+          <h4>ParseDerived-SHoC</h4>
+
           <p class="ednote">
 WORK IN PROGRESS.
           </p>
         </section>
-        <section id="ParseDerived-SHoC">
-          <h4>ParseDerived-SHoC</h4>
-        </section>
+
         <section id="VerifyDerived-SHoC">
           <h4>VerifyDerived-SHoC</h4>
         </section>
       </section>
         
-
       <section>
         <h4>Selective Disclosure Functions</h4>
 
