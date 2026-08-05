@@ -3957,7 +3957,7 @@ of the |mandatoryIndexes| and |selectiveIndexes| should be in the range of 0 to
 the length of |salts|. There should not be repeated items in the
 |mandatoryIndexes| and |selectiveIndexesArrays|. Also the elements of each of
 these arrays should be increasing order. Note that the minimal additional checks
-appear in [[[#SD-Verify-Derived]]].
+appear in [[[#VerifyDerived-SHoC]]].
           </p>
 
         </section>
@@ -3965,10 +3965,87 @@ appear in [[[#SD-Verify-Derived]]].
         <section id="VerifyDerived-SHoC">
           <h4>VerifyDerived-SHoC</h4>
 
-          <p class="ednote">
-WORK IN PROGRESS.
+          <p>
+The following algorithm attempts verification of an SHoC approach derived
+proof. This algorithm is called by a verifier of an SHoC approach protected
+[=verifiable credential=]. The inputs include a JSON-LD document
+(|document|), derived proof data (|proofData|), verification data 
+(|verifyData|), and any
+custom JSON-LD API options, such as a document loader. This algorithm returns
+a [=verification result=]:
           </p>
-          
+
+          <ol class="algorithm">
+            <li>
+Let |unsecuredDocument| be a copy of |document| with the `proof` value removed.
+            </li>
+            <li>
+Initialize |signature|,  |salts|, |saltedHashes|, and |selectiveIndexes| to the 
+values associated with their property names in the |proofData| parameter and 
+|proofHash|, |nonMandatory|, and |mandatoryHash| to the values  associated  with 
+their property names in the |verifyData| parameter.
+            </li>
+            <li>
+If the length of |salts| does not match the length of |saltedHashes|,
+an error MUST be raised and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>,
+indicating that the salt count does not match the salted hashes count.
+            </li>
+            <li>
+The values of the elements of the |selectiveIndexes| array must be between 0 and
+the length of the |salts| array minus one. If not,
+an error MUST be raised and SHOULD convey an error type of
+<a data-cite="VC-DATA-INTEGRITY#PROOF_VERIFICATION_ERROR">PROOF_VERIFICATION_ERROR</a>,
+indicating that the selective indexes are out of bounds.
+            </li>
+            <li>
+Initialize |toVerify| to the byte  concatenation of the values: |proofHash|,
+|mandatoryHash|, |salts|, and |saltedHashes| in that order with the array values
+themselves concatenated together.
+            </li>
+            <li>
+Initialize |verified| to true.
+            </li>
+            <li>
+Initialize |verificationCheck| be the result of applying the verification
+algorithm of the appropriate signature algorithms as indicated by
+the "cryptosuite" property,
+with |toVerify| as the data to be verified against the |signature|.
+If |verificationCheck| is
+`false`, set |verified| to false.
+            </li>
+            <li>
+For every entry (|nq|, |index|) in |nonMandatory|, verify the salted hash
+for every selectively disclosed (non-mandatory) statement:
+              <ol class="algorithm">
+                <li>
+Let |computedHash| be the  hash of the concatenation of
+|salts|[|selectiveIndexes|[index]] and |nq|.
+                </li>
+                <li>
+Initialize |verificationCheck| to the result of comparing the |computedHash|
+with the value of  |saltedHashes|[|selectedIndexes|[index]].
+
+                </li>
+                <li>
+If |verificationCheck| is `false`, set |verified| to false.
+                </li>
+              </ol>
+            </li>
+            <li>
+Return a [=verification result=] with [=struct/items=]:
+              <dl data-link-for="verification result">
+                <dt>[=verified=]</dt>
+                <dd>The value of |verified|</dd>
+                <dt>[=verifiedDocument=]</dt>
+                <dd>
+|unsecuredDocument| if |verified| is `true`, otherwise <a
+data-cite="INFRA#nulls">Null</a>
+                </dd>
+              </dl>
+            </li>
+          </ol>
+
         </section>
       </section>
         
