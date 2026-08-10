@@ -2800,13 +2800,13 @@ Let |proof| be a clone of the proof options, |options|.
         <section class="informative">
           <h3>Introduction</h3>
           <p>
-There are three high level algorithms used with credentials that support
+There are three high-level algorithms used with credentials that support
 cryptographic selective disclosure. First, the issuer uses the <em>Add Base 
 Proof</em> algorithm to create a signed credential that supports selective 
 disclosure. The holder then uses the <em>Add Derived Proof</em> algorithm to
-create a selectively disclosed version of the issuer signed credential along 
-with a derived proof. Finally the verifier uses the <em>Verify Derived 
-Proof</em> algorithms to verify the received selectively disclose credential
+create a selectively disclosed version of the issuer-signed credential along 
+with a derived proof. Finally, the verifier uses the <em>Verify Derived 
+Proof</em> algorithms to verify the received selectively disclosed credential
 with derived proof against the <strong>issuer's</strong> verification 
 information.
           </p>
@@ -2816,11 +2816,11 @@ selective disclosure that work primarily at the level of the <em>claims</em>
 within a verifiable credential, that is, allowing the holder to selectively 
 disclose, or not, a  particular claim from a credential. The three approaches 
 take into account the efficiency of the fundamental cryptographic signature 
-algorithm used. Only one, (to be) standardized,  cryptographic signature 
+algorithm used. Only one (to be) standardized cryptographic signature 
 algorithm, BBS, natively supports selective disclosure, i.e., it produces a base 
-signature over an ordered list of claims, and facilitates the creation 
+signature over an ordered list of claims and facilitates the creation 
 of a "derived signature" over a subset of that list of claims. For other 
-cryptographic signature algorithms two approaches are typically used: 
+cryptographic signature algorithms, two approaches are typically used: 
 (1) provide individual signatures for each claim, or (2) sign a list of 
 "salted hashes" for all claims. The first we  will refer to as SIC 
 (Sign Individual Claims), the second SHoC (Salted Hashes of Claims), and the 
@@ -2828,36 +2828,37 @@ case where the signature algorithm naturally supports multiple
 claims - MCS (Multiple Claim Support).
           </p>
           <p>
-All approaches utilize similar mechanisms to protect the proof related meta 
-data, and minimize data leakage of non-disclosed information from the derived 
-proof. They all incur roughly similar overhead in the base and derived proofs
+All approaches utilize similar mechanisms to protect the proof-related metadata, 
+and minimize data leakage of non-disclosed information from the derived proof. 
+They all incur roughly similar overhead in the base and derived proofs
 for these purposes. Similarly, all approaches utilize the same encoding of the
 individual data items that go into a proof, CBOR, and the final encoding of raw
-octets into a string, base64-url. Hence this information is not shown in the
+octets into a string, base64-url. Hence, this information is not shown in the
 summary [[[#SDApproachTable]]].
           </p>
           <p>
 The SIC approaches signs individual claims after the transformation step.
-Hence its base proof size scales as the number of claims times the size of the 
-signature produced by the chosen signature algorithm. Hence this approach is
+Hence, its base proof size scales as the number of claims times the size of the 
+signature produced by the chosen signature algorithm. Hence, this approach is
 good for signature algorithms that produce small signatures. The size of the
 derived proof scales as the number of revealed claims times the signature size.
 This is a nice property, not shared by the other two approaches, i.e., the
 fewer claims reveal the smaller the proof.
           </p>
           <p>
-In the SHoC a salt value, random nonce, is created for each claim, that salt  
-value is concatenated with the claim and a cryptographic collision 
-resistant hash function is applied to produce a list of hashes, one for each
-claim.  The lists of salts and hashes are combined and signed with a selected 
-signature algorithm. Only one signature is needed, hence this aproach is good 
+In the SHoC approach, a salt value (random nonce) is created for each claim; 
+that salt value is concatenated with the claim, and a cryptographic 
+collision-resistant hash function is applied to produce a list of hashes, one 
+for each claim.
+The lists of salts and hashes are combined and signed with a selected 
+signature algorithm. Only one signature is needed; hence, this approach is good 
 for signature algorithms with larger signature sizes. The downside is that the 
 complete list of salts and hashes must be conveyed to the holder and verifier. 
-To verify a revealed claim the verifier would first verify the signature for the
+To verify a revealed claim, the verifier would first verify the signature for the
 combined list of salts and hashes, then they must be told the index of the claim 
-in the list of salts and hashes, then using the appropriate salt value from the
-list they verify the value of hash of the salt concatenated with the received 
-claim and the hash from the table.
+in the list of salts and hashes, and then using the appropriate salt value from 
+the list, they verify the value of the hash of the salt concatenated with the 
+received claim and the hash from the table.
           </p>
           <p>
 In one MCS (Multi  Claim  Support) signature algorithm case, BBS, the produced 
@@ -2908,10 +2909,10 @@ We sumarize the properties of these approaches in
           </table>
 
           <p>
-In the following sections we define the three main selective disclosure 
+In the following sections, we define the three main selective disclosure 
 algorithms in terms of sub-algorithms. These sub-algorithms are of two types: 
 those that are independent of the selective disclosure implementation approaches
-discussed above and those that have  approach specific implementations.
+discussed above and those that have  approach-specific implementations.
           </p>
         </section>  <!-- end Introduction to SD Algorithms section -->
 
