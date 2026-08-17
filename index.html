@@ -2806,64 +2806,63 @@ Proof</em> algorithm to create a signed credential that supports selective
 disclosure. The holder then uses the <em>Add Derived Proof</em> algorithm to
 create a selectively disclosed version of the issuer-signed credential along 
 with a derived proof. Finally, the verifier uses the <em>Verify Derived 
-Proof</em> algorithms to verify the received selectively disclosed credential
+Proof</em> algorithm to verify the received selectively disclosed credential
 with derived proof against the <strong>issuer's</strong> verification 
 information.
           </p>
           <p>
-This specification supports three different implementation approaches to 
+This specification allows for three different implementation approaches to 
 selective disclosure that work primarily at the level of the <em>claims</em> 
-within a verifiable credential, that is, allowing the holder to selectively 
-disclose, or not, a  particular claim from a credential. The three approaches 
+within a verifiable credential; that is, they allow the holder to selectively 
+disclose, or not, each particular claim in the credential. The three approaches 
 take into account the efficiency of the fundamental cryptographic signature 
 algorithm used. Only one (to be) standardized cryptographic signature 
 algorithm, BBS, natively supports selective disclosure, i.e., it produces a base 
 signature over an ordered list of claims and facilitates the creation 
-of a "derived signature" over a subset of that list of claims. For other 
+of a "derived signature" over a subset of that list of claims. In other 
 cryptographic signature algorithms, two approaches are typically used: 
 (1) provide individual signatures for each claim, or (2) sign a list of 
-"salted hashes" for all claims. The first we  will refer to as SIC 
-(Sign Individual Claims), the second SHoC (Salted Hashes of Claims), and the 
-case where the signature algorithm naturally supports multiple 
-claims - MCS (Multiple Claim Support).
+"salted hashes" for all claims. We will refer to the first as `SIC` (Sign
+Individual Claims), and the second as `SHoC` (Salted Hashes of Claims).
+Cases where the signature algorithm naturally supports multiple claims,
+will be referred to as `MCS` (Multiple Claim Support).
           </p>
           <p>
-All approaches utilize similar mechanisms to protect the proof-related metadata, 
-and minimize data leakage of non-disclosed information from the derived proof. 
-They all incur roughly similar overhead in the base and derived proofs
-for these purposes. Similarly, all approaches utilize the same encoding of the
-individual data items that go into a proof, CBOR, and the final encoding of raw
-octets into a string, base64-url. Hence, this information is not shown in the
-summary [[[#SDApproachTable]]].
+All approaches use similar mechanisms to protect the proof-related metadata,
+and to minimize data leakage of non-disclosed information from the derived
+proof. They all incur roughly similar overhead in the base and derived proofs
+for these purposes. Similarly, all approaches use the same encoding of the
+individual data items that go into a proof, CBOR, and the final encoding of
+raw octets into a string, `base64-url`. Hence, this information is not shown
+in the summary [[[#SDApproachTable]]].
           </p>
           <p>
-The SIC approaches signs individual claims after the transformation step.
-Hence, its base proof size scales as the number of claims times the size of the 
-signature produced by the chosen signature algorithm. Hence, this approach is
-good for signature algorithms that produce small signatures. The size of the
-derived proof scales as the number of revealed claims times the signature size.
-This is a nice property, not shared by the other two approaches, i.e., the
-fewer claims reveal the smaller the proof.
+The SIC approaches sign individual claims after the transformation step. Hence,
+their base proof sizes scale as the number of claims times the size of the 
+signature produced by the chosen signature algorithm. Thus this approach is
+good for signature algorithms that produce small signatures. Along similar
+lines, the size of the derived proof scales as the number of revealed claims
+times the signature size, i.e., the fewer claims revealed, the smaller the
+proof. This is a nice property, not shared by the other two approaches.
           </p>
           <p>
-In the SHoC approach, a salt value (random nonce) is created for each claim; 
-that salt value is concatenated with the claim, and a cryptographic 
-collision-resistant hash function is applied to produce a list of hashes, one 
-for each claim.
-The lists of salts and hashes are combined and signed with a selected 
-signature algorithm. Only one signature is needed; hence, this approach is good 
-for signature algorithms with larger signature sizes. The downside is that the 
-complete list of salts and hashes must be conveyed to the holder and verifier. 
-To verify a revealed claim, the verifier would first verify the signature for the
-combined list of salts and hashes, then they must be told the index of the claim 
-in the list of salts and hashes, and then using the appropriate salt value from 
-the list, they verify the value of the hash of the salt concatenated with the 
-received claim and the hash from the table.
+When following the SHoC approach, a salt value (random nonce) is created for
+each claim. That salt value is concatenated with the claim, and a cryptographic
+collision-resistant hash function is applied to the list of paired salts+claims,
+to produce a list of hashes, one for each claim. The newly paired lists of salts
+and hashes are combined and signed with a selected signature algorithm. Only one
+signature is needed; thus, this approach is good for signature algorithms with
+larger signature sizes. A downside of this approach is that the complete list of
+salts and hashes must be conveyed to both holder and verifier. To verify a
+revealed claim, the verifier needs first to verify the signature for the combined
+list of salts and hashes; then they need to be told the index of the claim in
+that list; and then, using the appropriate salt value from the list, they verify
+the value of the hash of the salt concatenated with the received claim and the
+hash from the table.
           </p>
           <p>
-In one MCS (Multi  Claim  Support) signature algorithm case, BBS, the produced 
-base proof is extremely short, 80 bytes. While the derived proof grows as 32 
-bytes per non-revealed claim.
+In one MCS signature algorithm, BBS, the produced base proof is extremely short,
+80 bytes, while the derived proof grows by 32 bytes per non-revealed claim.
           </p>
 
           <p>
@@ -2903,16 +2902,15 @@ We sumarize the properties of these approaches in
                 <td>BBS signature</td>
                 <td>80 bytes</td>
                 <td>BBS <em>proof</em></td>
-                <td>272 + 32 &times;  (N<sub>claims</sub> - N<sub>revealed claims</sub>) bytes</td>
+                <td>272 + 32 &times; (N<sub>claims</sub> - N<sub>revealed claims</sub>) bytes</td>
               </tr>
             </tbody>
           </table>
-In the following sections, we define the three main selective disclosure algorithms in terms of sub-algorithms. These sub-algorithms are of two types: those that are independent of the selective disclosure implementation approaches discussed above and those that have approach-specific implementations.
           <p>
 In the following sections, we define the three main selective disclosure 
 algorithms in terms of sub-algorithms. These sub-algorithms are of two types: 
 those that are independent of the selective disclosure implementation approaches
-discussed above and those that have  approach-specific implementations.
+discussed above, and those that have approach-specific implementations.
           </p>
         </section>  <!-- end Introduction to SD Algorithms section -->
 
@@ -2946,19 +2944,18 @@ Let |hashData| be the result of running the algorithm in
 passed as a parameters.
             </li>
             <li>
-In the case of a SHoC approach, add to |hashData| the |saltedHash| data that 
-results from running the algorithm in [[[#SaltedHashSD]]].
+In a SHoC approach, add to |hashData| the |saltedHash| data that results
+from running the algorithm in [[[#SaltedHashSD]]].
             </li>
             <li>
-Let |proofBytes| be the result of running the approach specific 
-<em>SerializeBase</em>algorithm. For example, for the SIC approach use 
-[[[#SerializeBase-SIC]]] and for the SHoC approach use 
-[[[#SerializeBase-SHoC]]]. In all cases pass |hashData| and
-|options| as parameters.
+Let |proofBytes| be the result of running the approach-specific 
+<em>SerializeBase</em> algorithm. For example, use [[[#SerializeBase-SIC]]] for
+the SIC approach, and use [[[#SerializeBase-SHoC]]] for the SHoC approach. In
+all cases, pass |hashData| and |options| as parameters.
             </li>
             <li>
-Let |proof|.|proofValue| be a <a data-cite="CID#multibase-0">
-base64-url-encoded Multibase value</a> of the |proofBytes|.
+Let |proof|.|proofValue| be a <a data-cite="CID#multibase-0"
+>`base64-url-encoded` Multibase value</a> of the |proofBytes|.
             </li>
             <li>
 Return |proof| as the [=data integrity proof=].
@@ -2969,24 +2966,23 @@ Return |proof| as the [=data integrity proof=].
         <section>
           <h3>Add Derived Proof</h3>
           <p>
-The following algorithm creates a selective disclosure derived proof; called by
-a holder of a [=verifiable credential=] protected with a selective disclosure 
-'base proof'.
-The derived proof is to be given to the [=verifier=]. The inputs include a
-JSON-LD document (|document|), an selecitve disclosure base proof
-(|proof|), an array of JSON pointers to use to selectively disclose
-statements (|selectivePointers|), and any custom JSON-LD API options,
-such as a document loader. A single <em>selectively revealed document</em>
-value, represented as an object, is produced as output.
+The following algorithm creates a selective disclosure derived proof. It is
+called by a holder of a [=verifiable credential=] that is protected by a
+selective disclosure 'base proof'. The derived proof is to be given to a
+[=verifier=]. The algorithm inputs include a JSON-LD document (|document|); a
+selective disclosure base proof (|proof|); an array of JSON pointers to use to
+selectively disclose statements (|selectivePointers|); and any custom JSON-LD
+API options, such as a document loader. A single <em>selectively revealed
+document</em> value, represented as an object, is produced as output.
           </p>
 
           <ol>
             <li>
-Initialize the |proofData| object to the result returned from the approach  
-specific <em>ParseBase</em> sub-algorithm. For example, for the SIC approach 
-use [[[#ParseBase-SIC]]] and for the SHoC approach use [[[#ParseBase-SHoC]]].
-At a minimum the |proofData| object will contain the following fields: 
-|hmacKey| and |mandatoryPointers|.
+Let the |proofData| object be the result returned from the approach-specific
+<em>ParseBase</em> sub-algorithm. For example, for the SIC approach use
+[[[#ParseBase-SIC]]], and for the SHoC approach use [[[#ParseBase-SHoC]]].
+At a minimum, the |proofData| object will contain the fields |hmacKey| and
+|mandatoryPointers|.
             </li>
             <li>
 Initialize |disclosureData| to the object returned when calling the algorithm in
@@ -3000,11 +2996,11 @@ loader. The |disclosureData| object will contain the following fields:
 Initialize |newProof| to a shallow copy of |proof|.
             </li>
             <li>
-Replace |proofValue| in |newProof| with the result of calling the approach 
-specific  <em>SerializeDerived</em> algorithm. For example, for the SIC approach
-use [[[#SerializeDerived-SIC]]] and for the SHoC approach use 
-[[[#SerializeDerived-SHoC]]]. In all cases passing
-|proofData|,and |disclosureData| as parameters.
+Replace |proofValue| in |newProof| with the result of calling the approach-specific
+<em>SerializeDerived</em> algorithm. For example, for the SIC approach, use
+[[[#SerializeDerived-SIC]]], and for the SHoC approach, use
+[[[#SerializeDerived-SHoC]]]. In all cases, pass |proofData| and |disclosureData|
+as parameters.
             </li>
             <li>
 Set the value of the "proof" property in |revealDocument| to |newProof|.
@@ -3020,12 +3016,12 @@ Return |revealDocument| as the <em>selectively revealed document</em>.
         <section>
           <h3>Verify Derived Proof</h3>
           <p>
-The following algorithm attempts verification of a selecitive disclosure derived
-proof. This algorithm is called by a verifier of an selective disclosure 
-protected [=verifiable credential=]. The inputs include a JSON-LD document
-(|document|), a selective disclosure derived proof (|proof|), and any
-custom JSON-LD API options, such as a document loader. This algorithm returns
-a [=verification result=]:
+The following algorithm attempts verification of a selective disclosure
+derived proof. This algorithm is called by a verifier of a selective
+disclosure protected [=verifiable credential=]. Algorithm inputs include
+a JSON-LD document (|document|); a selective disclosure derived proof
+(|proof|); and any custom JSON-LD API options, such as a document loader.
+This algorithm returns a [=verification result=]:
           </p>
 
           <ol class="algorithm">
@@ -3033,25 +3029,25 @@ a [=verification result=]:
 Let |unsecuredDocument| be a copy of |document| with the `proof` value removed.
             </li>
             <li>
-Initialize the |proofData| object to the result returned from the approach  
-specific <em>ParseDerived</em> sub-algorithm. For example, for the SIC approach 
-use [[[#ParseDerived-SIC]]] and for the SHoC approach use [[[#ParseDerived-SHoC]]].
-At a minimum the |proofData| object will contain the following fields: 
-|labelMap| and |mandatoryIndexes|.
+Initialize the |proofData| object to the result returned by the approach-specific
+<em>ParseDerived</em> sub-algorithm. For example, for the SIC approach, use
+[[[#ParseDerived-SIC]]], and for the SHoC approach, use [[[#ParseDerived-SHoC]]].
+At a minimum, the |proofData| object will contain the fields |labelMap| and
+|mandatoryIndexes|.
             </li>            
             <li>
-Initialize the |verifyData| object to the value returned when calling the 
+Initialize the |verifyData| object to the value returned by calling the 
 algorithm in Section [[[#CreateVerifyData]]], passing the |document|, 
 |proofData|, and any custom JSON-LD API options, such as a document loader.
 The |verifyData| object will contain the following fields: |proofHash|, 
 |mandatoryHash|, and |nonMandatory|.
             </li>
             <li>
-Initialize |verified| to the result of calling the approach specific 
-<em>VerifyDerived</em> algorithm. For example, for the SIC approach use  
-[[[#VerifyDerived-SIC]]] and  for the SHoC approach use 
-[[[#VerifyDerived-SHoC]]]. In all cases passing |proofData| and |verifyData| as
-parameters.
+Initialize |verified| to the result of calling the approach-specific 
+<em>VerifyDerived</em> algorithm. For example, for the SIC approach, use  
+[[[#VerifyDerived-SIC]]], and for the SHoC approach, use
+[[[#VerifyDerived-SHoC]]]. In all cases, pass |proofData| and
+|verifyData| as parameters.
             </li>
             <li>
 Return a [=verification result=] with [=struct/items=]:
@@ -3060,7 +3056,7 @@ Return a [=verification result=] with [=struct/items=]:
                 <dd>The value of |verified|</dd>
                 <dt>[=verifiedDocument=]</dt>
                 <dd>
-|unsecuredDocument| if |verified| is `true`, otherwise <a
+if |verified| is `true`, |unsecuredDocument|; otherwise <a
 data-cite="INFRA#nulls">Null</a>
                 </dd>
               </dl>
@@ -3079,24 +3075,22 @@ data-cite="INFRA#nulls">Null</a>
           <p>
 The following algorithm specifies how to transform an unsecured input document
 into a transformed document that is ready to be provided as input to the
-hashing algorithm in Section [[[#HashSD]]] and depending on approach may be
-input to the salted hashing algorithm [[[#SaltedHashSD]]].
+hashing algorithm in Section [[[#HashSD]]] and, depending on approach, may be
+provided as input to the salted hashing algorithm, [[[#SaltedHashSD]]].
           </p>
 
           <p>
-Required inputs to this algorithm are an
-<a data-cite="vc-data-integrity#dfn-unsecured-data-document">
-unsecured data document</a> (|unsecuredDocument|) and
-transformation options (|options|). The
-transformation options MUST contain a type identifier for the
-<a data-cite="vc-data-integrity#dfn-cryptosuite">
-cryptographic suite</a> (|type|), a cryptosuite
-identifier (|cryptosuite|), and a verification method
-(|verificationMethod|). The transformation options MUST contain an
-array of mandatory JSON pointers (|mandatoryPointers|) and MAY contain
-additional options, such as a JSON-LD document loader. A <em>transformed data
-document</em> is produced as output. Whenever this algorithm encodes strings, it
-MUST use UTF-8 encoding.
+Required inputs to this algorithm are an <a data-cite=
+"vc-data-integrity#dfn-unsecured-data-document">unsecured data document</a>
+(|unsecuredDocument|) and transformation options (|options|). The
+transformation options MUST contain a type identifier for the <a data-cite=
+"vc-data-integrity#dfn-cryptosuite">cryptographic suite</a> (|type|), a
+cryptosuite identifier (|cryptosuite|), and a verification method
+(|verificationMethod|). The transformation options MUST contain an array of
+mandatory JSON pointers (|mandatoryPointers|) and MAY contain additional
+options, such as a JSON-LD document loader. A <em>transformed data
+document</em> is produced as output. Whenever this algorithm encodes
+strings, it MUST use UTF-8 encoding.
           </p>
 
           <ol class="algorithm">
