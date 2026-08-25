@@ -2812,7 +2812,7 @@ information.
           </p>
           <p>
 This specification allows for three different implementation approaches to 
-selective disclosure that work primarily at the level of the <em>claims</em> 
+selective disclosure that work primarily at the level of the [=claims=] 
 within a verifiable credential; that is, they allow the holder to selectively 
 disclose, or not, each particular claim in the credential. The three approaches 
 take into account the efficiency of the fundamental cryptographic signature 
@@ -2822,10 +2822,10 @@ signature over an ordered list of claims and facilitates the creation
 of a "derived signature" over a subset of that list of claims. In other 
 cryptographic signature algorithms, two approaches are typically used: 
 (1) provide individual signatures for each claim, or (2) sign a list of 
-"salted hashes" for all claims. We will refer to the first as `SIC` (Sign
-Individual Claims), and the second as `SHoC` (Salted Hashes of Claims).
+"salted hashes" for all claims. We will refer to the first as <dfn class="export">SIC</dfn> (Sign
+Individual Claims), and the second as <dfn class="export">SHoC</dfn< (Salted Hashes of Claims).
 Cases where the signature algorithm naturally supports multiple claims,
-will be referred to as `MCS` (Multiple Claim Support).
+will be referred to as <dfn class="export">MCS</dfn> (Multiple Claim Support).
           </p>
           <p>
 All approaches use similar mechanisms to protect the proof-related metadata,
@@ -2837,7 +2837,7 @@ raw octets into a string, `base64-url`. Hence, this information is not shown
 in the summary [[[#SDApproachTable]]].
           </p>
           <p>
-The SIC approaches sign individual claims after the transformation step. Hence,
+The [=SIC=] approaches sign individual claims after the transformation step. Hence,
 their base proof sizes scale as the number of claims times the size of the 
 signature produced by the chosen signature algorithm. Thus this approach is
 good for signature algorithms that produce small signatures. Along similar
@@ -2846,7 +2846,7 @@ times the signature size, i.e., the fewer claims revealed, the smaller the
 proof. This is a nice property, not shared by the other two approaches.
           </p>
           <p>
-When following the SHoC approach, a salt value (random nonce) is created for
+When following the [=SHoC=] approach, a salt value (random nonce) is created for
 each claim. That salt value is concatenated with the claim, and a cryptographic
 collision-resistant hash function is applied to the list of paired salts+claims,
 to produce a list of hashes, one for each claim. The newly paired lists of salts
@@ -2866,7 +2866,7 @@ In one MCS signature algorithm, BBS, the produced base proof is extremely short,
           </p>
 
           <p>
-We sumarize the properties of these approaches in 
+We summarize the properties of these approaches in 
 [[[#SDApproachTable]]]. 
           </p>
           <table id="SDApproachTable" class="data numbered">
